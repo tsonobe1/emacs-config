@@ -1,0 +1,29 @@
+{
+  "plugins": {
+    "@textlint/text": {
+      "extensions": [".org", ".txt", ".md"]
+    }
+  },
+  "filters": {},
+  "rules": {
+    "preset-ja-technical-writing": {
+      "max-ten": {
+        "max": 1,
+        "strict": true,
+        "touten": "、",
+        "kuten": "。"
+      },
+      "ja-no-mixed-period": false,
+      "no-exclamation-question-mark": false,
+      "no-doubled-conjunctive-particle-ga": true,
+      "no-doubled-joshi": true,
+      "no-doubled-conjunction": true,
+      "no-dropping-the-ra": true,
+      "no-double-negative-ja": true,
+      "no-mix-dearu-desumasu": true,
+      "sentence-length": false,
+      "ja-no-weak-phrase": true,
+      "ja-no-redundant-expression": true
+    }
+  }
+}
