@@ -77,6 +77,23 @@
 
 (require 'gnuplot)
 
+(unless (package-installed-p 'ob-mermaid)
+  (package-refresh-contents)
+  (package-install 'ob-mermaid))
+
+(if (eq system-type 'windows-nt)
+    ;; Windowsの場合
+    (progn
+      (setq ob-mermaid-cli-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"))
+  ;; Macの場合
+  (progn
+    (setq ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")))
+
+(org-babel-do-load-languages
+    'org-babel-load-languages
+    '((mermaid . t)
+      (scheme . t)))
+
 (unless (package-installed-p 'flycheck)
   (package-refresh-contents)
   (package-install 'flycheck))
@@ -159,37 +176,37 @@
 (setq org-roam-capture-templates
   '(("d" "default" plain "%?"
      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-			 "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			 "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
  :unnarrowed t)
 
     ("n" "knowledge" plain "%?"
      :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
  :unnarrowed t)
 
     ("w" "work" plain "%?"
      :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
  :unnarrowed t)
 
     ("t" "tool" plain "%?"
      :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
  :unnarrowed t)
 
     ("r" "recipe" plain "%?"
      :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
  :unnarrowed t)
 
     ("m" "money" plain "%?"
      :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
  :unnarrowed t)
 
     ("c" "discuss" plain "%?"
      :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n#+ROAM_ALIASES: \n#+ROAM_REFS: \n")
+			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
  :unnarrowed t)))
 
 (global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
@@ -326,8 +343,8 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; agenda対象ディレクトリ
 (setq org-agenda-files (list (if (eq system-type 'windows-nt)
-				 "C:/emacs-org"
-			       "~/.emacs.d")))
+				 "C:/emacs-org/inbox.org"
+			       "~/.emacs.d/inbox.org")))
 
 ;; 行のハイライト
 (add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)))
