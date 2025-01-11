@@ -383,6 +383,11 @@ If PREFIX is empty, show a message and do nothing."
 (use-package all-the-icons
   :ensure t)
 
+;; secrets.elを読み込む
+(let ((secrets-file "~/.emacs.d/config/secrets.el"))
+  (when (file-exists-p secrets-file)
+    (load secrets-file)))
+
 (use-package org-ai
 :ensure t
 :commands (org-ai-mode
@@ -394,4 +399,4 @@ If PREFIX is empty, show a message and do nothing."
 (setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
 (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
 
-(setq org-ai-openai-api-token "")
+(setq org-ai-openai-api-token org-ai-api-key)
