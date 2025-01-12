@@ -18,7 +18,6 @@
     (require 'use-package)
     (setq use-package-always-ensure t)
 
-
   #+end_src
 * Org-modeの設定
   #+BEGIN_SRC emacs-lisp
@@ -199,7 +198,8 @@
     (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
     (global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-today)
     (global-set-key (kbd "C-c n g") 'org-roam-graph)
-    (global-set-key (kbd "C-c n T") 'org-roam-dailies-find-today)
+    (global-set-key (kbd "C-c n a") 'org-roam-alias-add)
+    (global-set-key (kbd "C-c n r") 'org-roam-ref-add)
 
     (setq org-roam-completion-everywhere t)
 
@@ -301,6 +301,8 @@
     :config
     (line-number-mode 0)
     (column-number-mode 0))
+
+  (tool-bar-mode -1)
   #+END_SRC
 
 * その他設定
@@ -461,6 +463,7 @@
     (when (file-exists-p secrets-file)
       (load secrets-file)))
 
+  ;; org-aiのインストールと設定
   (use-package org-ai
   :ensure t
   :commands (org-ai-mode
@@ -472,5 +475,12 @@
   (setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
   (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
 
+  ;; 環境変数からAPIキーを取得する
   (setq org-ai-openai-api-token org-ai-api-key)
+
+  ;; org-structure-template-alist にカスタムテンプレートを追加
+  (with-eval-after-load 'org
+    (add-to-list 'org-structure-template-alist
+                ;; <ai + tab --> #+begin_ai
+                 '("ai" . "ai")))
 #+end_src

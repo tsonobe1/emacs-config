@@ -169,7 +169,8 @@
 (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
 (global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-today)
 (global-set-key (kbd "C-c n g") 'org-roam-graph)
-(global-set-key (kbd "C-c n T") 'org-roam-dailies-find-today)
+(global-set-key (kbd "C-c n a") 'org-roam-alias-add)
+(global-set-key (kbd "C-c n r") 'org-roam-ref-add)
 
 (setq org-roam-completion-everywhere t)
 
@@ -265,6 +266,8 @@
   :config
   (line-number-mode 0)
   (column-number-mode 0))
+
+(tool-bar-mode -1)
 
 (use-package which-key
   :diminish which-key-mode
@@ -384,19 +387,26 @@ If PREFIX is empty, show a message and do nothing."
   :ensure t)
 
 ;; secrets.elを読み込む
-(let ((secrets-file "~/.emacs.d/config/secrets.el"))
-  (when (file-exists-p secrets-file)
-    (load secrets-file)))
+  (let ((secrets-file "~/.emacs.d/config/secrets.el"))
+    (when (file-exists-p secrets-file)
+      (load secrets-file)))
 
-(use-package org-ai
-:ensure t
-:commands (org-ai-mode
-	   org-ai-global-mode)
-:init
-(add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-(org-ai-global-mode) ; installs global keybindings on C-c M-a
-:config
-(setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
-(org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
+  ;; org-aiのインストールと設定
+  (use-package org-ai
+  :ensure t
+  :commands (org-ai-mode
+	     org-ai-global-mode)
+  :init
+  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
+  (org-ai-global-mode) ; installs global keybindings on C-c M-a
+  :config
+  (setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
+  (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
 
-(setq org-ai-openai-api-token org-ai-api-key)
+  ;; 環境変数からAPIキーを取得する
+  (setq org-ai-openai-api-token org-ai-api-key)
+
+  ;; org-structure-template-alist にカスタムテンプレートを追加
+(with-eval-after-load 'org
+  (add-to-list 'org-structure-template-alist
+               '("ai" . "ai")))
