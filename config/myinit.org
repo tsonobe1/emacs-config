@@ -196,7 +196,7 @@
     (global-set-key (kbd "C-c n i") 'org-roam-node-insert)
     (global-set-key (kbd "C-c n t") 'org-roam-buffer-toggle)
     (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
-    (global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-today)
+    (global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-date)
     (global-set-key (kbd "C-c n g") 'org-roam-graph)
     (global-set-key (kbd "C-c n a") 'org-roam-alias-add)
     (global-set-key (kbd "C-c n r") 'org-roam-ref-add)
@@ -238,6 +238,13 @@
 	 :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
 			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
      :unnarrowed t)))
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "dailies" entry
+         "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
+
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp
@@ -286,7 +293,7 @@
     :custom-face
     (doom-modeline-bar ((t (:background "#6272a4"))))
     :config
-    (load-theme 'doom-dracula t)
+    (load-theme 'doom-badger t)
     (doom-themes-neotree-config)
     (doom-themes-org-config))
 
@@ -353,8 +360,24 @@
         (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
 
   (global-set-key (kbd "C-c i") 'my/org-insert-sections)
-  #+END_SRC
 
+  
+  (setq org-ascii-headline-spacing '(0 . 0))
+  (eval-after-load "org"
+    '(require 'ox-md nil t))
+
+    ;; 空行削除のカスタムコマンド
+    ;; markdownに出力したバッファー内で使用することを想定している
+  (defun my/remove-blank-lines ()
+    "Remove all blank lines in the current buffer."
+    (interactive)
+    (save-excursion
+      (goto-char (point-min))
+      (flush-lines "^[[:space:]]*$")))
+  (global-set-key (kbd "C-c d") 'my/remove-blank-lines)
+
+
+  #+END_SRC
 * Todo
 #+BEGIN_SRC emacs-lisp
   (setq org-todo-keywords
@@ -459,9 +482,12 @@
 * org-ai
 #+begin_src emacs-lisp
   ;; secrets.elを読み込む
-  (let ((secrets-file "~/.emacs.d/config/secrets.el"))
+  (let ((secrets-file
+      (if (eq system-type 'windows-nt)
+        "C:/emacs-org/config/secrets.el" ;; Windowsのパス
+        "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
     (when (file-exists-p secrets-file)
-      (load secrets-file)))
+    (load secrets-file)))
 
   ;; org-aiのインストールと設定
   (use-package org-ai
@@ -472,7 +498,7 @@
   (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
   (org-ai-global-mode) ; installs global keybindings on C-c M-a
   :config
-  (setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
+  (setq org-ai-default-chat-model "gpt-4.1-mini") ; if you are on the gpt-4 beta:
   (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
 
   ;; 環境変数からAPIキーを取得する

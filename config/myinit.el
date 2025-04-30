@@ -149,66 +149,72 @@
     (setenv "PATH" (concat "/Users/tsonobe/.nodebrew/current/bin/node" (getenv "PATH")))))
 
 (unless (package-installed-p 'org-roam)
-  (package-refresh-contents)
-  (package-install 'org-roam))
+      (package-refresh-contents)
+      (package-install 'org-roam))
 
-(require 'org-roam)
-(setq org-roam-directory
-      (file-truename (if (eq system-type 'windows-nt)
-			 "C:/emacs-org/org-roam"
-		       "~/.emacs.d/org-roam")))
-(setq org-roam-db-location
-      (if (eq system-type 'windows-nt)
-	  "C:/emacs-org/org-roam/org-roam.db"
-	"~/.emacs.d/org-roam/org-roam.db"))
-(org-roam-db-autosync-mode)
+    (require 'org-roam)
+    (setq org-roam-directory
+	  (file-truename (if (eq system-type 'windows-nt)
+			     "C:/emacs-org/org-roam"
+			   "~/.emacs.d/org-roam")))
+    (setq org-roam-db-location
+	  (if (eq system-type 'windows-nt)
+	      "C:/emacs-org/org-roam/org-roam.db"
+	    "~/.emacs.d/org-roam/org-roam.db"))
+    (org-roam-db-autosync-mode)
 
-(global-set-key (kbd "C-c n f") 'org-roam-node-find)
-(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
-(global-set-key (kbd "C-c n t") 'org-roam-buffer-toggle)
-(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
-(global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-today)
-(global-set-key (kbd "C-c n g") 'org-roam-graph)
-(global-set-key (kbd "C-c n a") 'org-roam-alias-add)
-(global-set-key (kbd "C-c n r") 'org-roam-ref-add)
+    (global-set-key (kbd "C-c n f") 'org-roam-node-find)
+    (global-set-key (kbd "C-c n i") 'org-roam-node-insert)
+    (global-set-key (kbd "C-c n t") 'org-roam-buffer-toggle)
+    (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
+    (global-set-key (kbd "C-c n d") 'org-roam-dailies-capture-date)
+    (global-set-key (kbd "C-c n g") 'org-roam-graph)
+    (global-set-key (kbd "C-c n a") 'org-roam-alias-add)
+    (global-set-key (kbd "C-c n r") 'org-roam-ref-add)
 
-(setq org-roam-completion-everywhere t)
+    (setq org-roam-completion-everywhere t)
 
-(setq org-roam-capture-templates
-  '(("d" "default" plain "%?"
-     :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-			 "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
- :unnarrowed t)
+    (setq org-roam-capture-templates
+      '(("d" "default" plain "%?"
+	 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+			     "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
+     :unnarrowed t)
 
-    ("n" "knowledge" plain "%?"
-     :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
- :unnarrowed t)
+	("n" "knowledge" plain "%?"
+	 :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+     :unnarrowed t)
 
-    ("w" "work" plain "%?"
-     :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
- :unnarrowed t)
+	("w" "work" plain "%?"
+	 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
+     :unnarrowed t)
 
-    ("t" "tool" plain "%?"
-     :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
- :unnarrowed t)
+	("t" "tool" plain "%?"
+	 :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
+     :unnarrowed t)
 
-    ("r" "recipe" plain "%?"
-     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
- :unnarrowed t)
+	("r" "recipe" plain "%?"
+	 :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
+     :unnarrowed t)
 
-    ("m" "money" plain "%?"
-     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
- :unnarrowed t)
+	("m" "money" plain "%?"
+	 :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
+     :unnarrowed t)
 
-    ("c" "discuss" plain "%?"
-     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-			"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
- :unnarrowed t)))
+	("c" "discuss" plain "%?"
+	 :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
+     :unnarrowed t)))
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "dailies" entry
+         "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
 (global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
 
@@ -251,7 +257,7 @@
   :custom-face
   (doom-modeline-bar ((t (:background "#6272a4"))))
   :config
-  (load-theme 'doom-dracula t)
+  (load-theme 'doom-badger t)
   (doom-themes-neotree-config)
   (doom-themes-org-config))
 
@@ -312,6 +318,21 @@ If PREFIX is empty, show a message and do nothing."
       (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
 
 (global-set-key (kbd "C-c i") 'my/org-insert-sections)
+
+
+(setq org-ascii-headline-spacing '(0 . 0))
+(eval-after-load "org"
+  '(require 'ox-md nil t))
+
+  ;; 空行削除のカスタムコマンド
+  ;; markdownに出力したバッファー内で使用することを想定している
+(defun my/remove-blank-lines ()
+  "Remove all blank lines in the current buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (flush-lines "^[[:space:]]*$")))
+(global-set-key (kbd "C-c d") 'my/remove-blank-lines)
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
@@ -387,26 +408,30 @@ If PREFIX is empty, show a message and do nothing."
   :ensure t)
 
 ;; secrets.elを読み込む
-  (let ((secrets-file "~/.emacs.d/config/secrets.el"))
-    (when (file-exists-p secrets-file)
-      (load secrets-file)))
+(let ((secrets-file
+    (if (eq system-type 'windows-nt)
+      "C:/emacs-org/config/secrets.el" ;; Windowsのパス
+      "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
+  (when (file-exists-p secrets-file)
+  (load secrets-file)))
 
-  ;; org-aiのインストールと設定
-  (use-package org-ai
-  :ensure t
-  :commands (org-ai-mode
-	     org-ai-global-mode)
-  :init
-  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-  (org-ai-global-mode) ; installs global keybindings on C-c M-a
-  :config
-  (setq org-ai-default-chat-model "gpt-4o-mini") ; if you are on the gpt-4 beta:
-  (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
+;; org-aiのインストールと設定
+(use-package org-ai
+:ensure t
+:commands (org-ai-mode
+	   org-ai-global-mode)
+:init
+(add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
+(org-ai-global-mode) ; installs global keybindings on C-c M-a
+:config
+(setq org-ai-default-chat-model "gpt-4.1-mini") ; if you are on the gpt-4 beta:
+(org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
 
-  ;; 環境変数からAPIキーを取得する
-  (setq org-ai-openai-api-token org-ai-api-key)
+;; 環境変数からAPIキーを取得する
+(setq org-ai-openai-api-token org-ai-api-key)
 
-  ;; org-structure-template-alist にカスタムテンプレートを追加
+;; org-structure-template-alist にカスタムテンプレートを追加
 (with-eval-after-load 'org
   (add-to-list 'org-structure-template-alist
+              ;; <ai + tab --> #+begin_ai
                '("ai" . "ai")))
