@@ -1,12 +1,60 @@
 ;; Emacs 全体の言語環境を日本語に設定
 (set-language-environment "Japanese")
+
 ;; デフォルトの文字コードを UTF-8 に設定
 (prefer-coding-system 'utf-8)
+
 ;; 曜日・月名などのロケール表記を英語（C ロケール）にする
 (setq system-time-locale "C")
 (set-locale-environment "en_US.UTF-8")
+
 ;; バッファのデフォルトのファイル文字コードを UTF-8 に設定
 (set-default 'buffer-file-coding-system 'utf-8)
+
+;; Emacs 全体で常に行番号を表示
+(global-display-line-numbers-mode t)
+
+;; Emacs が .el（ソース）と .elc（コンパイル済みバイトコード）の両方を見つけたとき、自動的にソースのほうが新い方を読む
+(setq load-prefer-newer t)
+
+;; -------------------------------------------------------------
+;; which-key：キーバインド補助（次に押すべきキーを教えてくれる）
+;; -------------------------------------------------------------
+(use-package which-key 
+  :diminish which-key-mode ;; モードライン表示を簡素化
+  :hook (after-init . which-key-mode)) ;; Emacs起動後に自動有効化
+
+;; -------------------------------------------------------------
+;; amx：M-x 実行履歴を強化（smexの後継）
+;; -------------------------------------------------------------
+(use-package amx)
+
+;; ---------------------------------------------
+;; パッケージ管理の初期設定
+;; ---------------------------------------------
+
+;; Emacs の組み込みパッケージマネージャを有効にする
+(require 'package)
+
+;; 使用するパッケージアーカイブ（リポジトリ）を設定
+;; MELPA は多数の最新パッケージを含んでいるので特に重要
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+	("melpa" . "http://melpa.org/packages/")))
+
+;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
+(package-initialize)
+
+;; `org` パッケージを明示的にインストール
+(package-install 'org)
+
+;; ---------------------------------------------
+;; gnuplot の読み込み
+;; ---------------------------------------------
+
+;; `gnuplot.el` を読み込む（描画コマンド連携用）
+;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
+(require 'gnuplot)
 
 ;; パッケージ一覧を更新してインストール
 (unless (package-installed-p 'use-package)
@@ -18,7 +66,27 @@
 (setq use-package-always-ensure t)
 
 (setq package-enable-at-startup nil)
-(setq load-prefer-newer t)
+
+;; -------------------------------------------------------------
+;; straight.el のインストール（Windows 以外の環境でのみ実行）
+;; -------------------------------------------------------------
+(unless (eq system-type 'windows-nt)
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 7))
+
+    ;; bootstrap.el が存在しない場合は、インターネットから取得してインストール
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
+
+    ;; straight.el をロード
+    (load bootstrap-file nil 'nomessage)))
 
 ;; org-tempo を読み込むことで、<s TAB などのテンプレ展開が有効になる
 (require 'org-tempo)
@@ -56,15 +124,10 @@
 ;; C用の Babel モジュールを読み込む
 (require 'ob-C)
 
-;; Emacs 全体で常に行番号を表示
-(global-display-line-numbers-mode t)
-
-
 ;; dockerfile-modeの設定
 (use-package dockerfile-mode
   :ensure t
   :mode ("Dockerfile\\'" . dockerfile-mode))
-
 
 ;; markdown-modeの設定
 (use-package markdown-mode
@@ -92,33 +155,6 @@
 (add-hook 'org-mode-hook
 	  (lambda ()
 	    (local-set-key (kbd "C-c t") 'my-toggle-truncate-lines)))
-
-;; ---------------------------------------------
-;; パッケージ管理の初期設定
-;; ---------------------------------------------
-
-;; Emacs の組み込みパッケージマネージャを有効にする
-(require 'package)
-
-;; 使用するパッケージアーカイブ（リポジトリ）を設定
-;; MELPA は多数の最新パッケージを含んでいるので特に重要
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-	("melpa" . "http://melpa.org/packages/")))
-
-;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
-(package-initialize)
-
-;; `org` パッケージを明示的にインストール
-(package-install 'org)
-
-;; ---------------------------------------------
-;; gnuplot の読み込み
-;; ---------------------------------------------
-
-;; `gnuplot.el` を読み込む（描画コマンド連携用）
-;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
-(require 'gnuplot)
 
 (unless (package-installed-p 'ob-mermaid)
   (package-refresh-contents)
@@ -199,6 +235,12 @@
 
     ;; 環境変数 PATH にも追加
     (setenv "PATH" (concat "/Users/tsonobe/.nodebrew/current/bin/node" (getenv "PATH")))))
+
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
+
+;; Doneの時刻を記録する
+(setq org-log-done 'time)
 
 ;; -------------------------------------------------------------
 ;; org-roam の導入と初期設定
@@ -293,192 +335,6 @@
 	 :target (file+head "%<%Y-%m-%d>.org"
 			    "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
-(global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
-
-
-(defun check-org-properties-block-recursively ()
-  "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
-  (interactive)
-  (let* ((directory (file-name-as-directory org-roam-directory))
-	 (total-files 0)
-	 (ok-files 0)
-	 (ng-files 0)
-	 (ng-files-list '()))
-    (dolist (file (directory-files-recursively directory "\\.org$"))
-      (setq total-files (1+ total-files))
-      (with-temp-buffer
-	(insert-file-contents file)
-	(goto-char (point-min))
-	(if (and (re-search-forward ":PROPERTIES:" nil t)
-		 (re-search-forward ":ID:" nil t)
-		 (re-search-forward ":END:" nil t))
-	    (setq ok-files (1+ ok-files))
-	  (setq ng-files (1+ ng-files))
-	  (push file ng-files-list))))
-    ;; 結果を表示
-    (message "Total files: %d" total-files)
-    (message "OK files: %d" ok-files)
-    (message "NG files: %d" ng-files)
-    (when ng-files-list
-      (message "NG files list:")
-      (dolist (file ng-files-list)
-	(message "%s" file)))))
-
-;; 関数をインタラクティブにするための設定
-(provide 'check-org-properties-block-recursively)
-
-;; ----------------------------------------------------------
-;; Doom Themes の設定
-;; ----------------------------------------------------------
-(use-package doom-themes
-  ;; Italic / Bold をテーマ内で有効にする
-  :custom
-  (doom-themes-enable-italic t)
-  (doom-themes-enable-bold t)
-
-  ;; モードラインのバーの色をカスタム設定
-  :custom-face
-  (doom-modeline-bar ((t (:background "#6272a4"))))
-
-  ;; テーマを読み込む（t を渡すと確認なしで即時適用）
-  :config
-  (load-theme 'doom-badger t)
-
-  ;; Neotree（ファイルツリー）の配色を Doom 仕様に
-  (doom-themes-neotree-config)
-
-  ;; Org-mode 用の色設定を有効にする
-  (doom-themes-org-config))
-
-;; ----------------------------------------------------------
-;; Doom Modeline（ステータスライン）の設定
-;; ----------------------------------------------------------
-(use-package doom-modeline
-  :custom
-  ;; ファイル名表示形式：プロジェクトルートからの相対パス
-  (doom-modeline-buffer-file-name-style 'truncate-with-project)
-
-  ;; アイコン表示を有効にする（フォントが必要）
-  (doom-modeline-icon t)
-
-  ;; メジャーモードのアイコンは非表示
-  (doom-modeline-major-mode-icon nil)
-
-  ;; マイナーモード表示を非表示にして簡潔化
-  (doom-modeline-minor-modes nil)
-
-  :hook
-  ;; Emacs 初期化後に自動で doom-modeline を有効化
-  (after-init . doom-modeline-mode)
-
-  :config
-  ;; モードラインから行番号・列番号表示を削除（見た目をシンプルに）
-  (line-number-mode 0)
-  (column-number-mode 0))
-
-;; ----------------------------------------------------------
-;; GUIのツールバーを非表示にして画面を広く使う
-;; ----------------------------------------------------------
-(tool-bar-mode -1)
-
-;; -------------------------------------------------------------
-;; which-key：キーバインド補助（次に押すべきキーを教えてくれる）
-;; -------------------------------------------------------------
-(use-package which-key 
-  :diminish which-key-mode ;; モードライン表示を簡素化
-  :hook (after-init . which-key-mode)) ;; Emacs起動後に自動有効化
-
-;; -------------------------------------------------------------
-;; amx：M-x 実行履歴を強化（smexの後継）
-;; -------------------------------------------------------------
-(use-package amx)
-
-
-;; -------------------------------------------------------------
-;; カスタムテーマ・パッケージ情報の設定
-;; -------------------------------------------------------------
-(custom-set-variables
- '(custom-safe-themes
-   '("b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" default))
- '(package-selected-packages '(org doom-modeline doom-themes listen)))
-
-;; -------------------------------------------------------------
-;; ウィンドウの透過設定（foreground 90%, background 80%）
-;; -------------------------------------------------------------
-(set-frame-parameter nil 'alpha '(95 . 80))
-(add-to-list 'default-frame-alist '(alpha . (95 . 80)))
-
-;; -------------------------------------------------------------
-;; straight.el のインストール（Windows 以外の環境でのみ実行）
-;; -------------------------------------------------------------
-(unless (eq system-type 'windows-nt)
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 7))
-
-    ;; bootstrap.el が存在しない場合は、インターネットから取得してインストール
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
-
-    ;; straight.el をロード
-    (load bootstrap-file nil 'nomessage)))
-
-(defun my/org-insert-sections (start end levels prefix char)
-  "Insert sections from START to END with LEVELS characters (CHAR) and PREFIX.
-If PREFIX is empty, show a message and do nothing."
-  (interactive
-   (list (read-number "Start number: " 0)
-	 (read-number "End number: " 9)
-	 (read-number "Levels (number of characters): " 2)
-	 (read-string "Prefix: ")
-	 (read-char-choice "Choose character (*, -, +): " '(?* ?- ?+))))
-  (if (string-empty-p prefix)
-      (message "Please enter a prefix.")
-    (dotimes (i (1+ (- end start)))
-      (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
-
-(global-set-key (kbd "C-c i") 'my/org-insert-sections)
-
-
-
-;; ------------------------------------------------------------
-;; Org の ASCII / Markdown エクスポートに関する設定
-;; ------------------------------------------------------------
-
-;; ASCII エクスポート時の見出し前後の空行を削除
-(setq org-ascii-headline-spacing '(0 . 0))
-
-;; Org-mode 読み込み後に Markdown エクスポート用のバックエンドを読み込む
-(eval-after-load "org"
-  '(require 'ox-md nil t))
-
-
-;; ------------------------------------------------------------
-;; 空行をすべて削除する関数（Markdown 書き出し後の整形向け）
-;; ------------------------------------------------------------
-;; markdownに出力したバッファー内で使用することを想定している
-(defun my/remove-blank-lines ()
-  "Remove all blank lines in the current buffer."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (flush-lines "^[[:space:]]*$")))
-
-;; C-c d で空行削除を実行
-(global-set-key (kbd "C-c d") 'my/remove-blank-lines)
-
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
-
-;; Doneの時刻を記録する
-(setq org-log-done 'time)
-
 ;; org-captureをC-c cにバインド
 (global-set-key (kbd "C-c c") 'org-capture)
 
@@ -552,6 +408,150 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; タスクが完了した時に自動的にclock outする
 (setq org-clock-out-when-done t)
+
+;; ------------------------------------------------------------
+;; Org の ASCII / Markdown エクスポートに関する設定
+;; ------------------------------------------------------------
+
+;; ASCII エクスポート時の見出し前後の空行を削除
+(setq org-ascii-headline-spacing '(0 . 0))
+
+;; Org-mode 読み込み後に Markdown エクスポート用のバックエンドを読み込む
+(eval-after-load "org"
+  '(require 'ox-md nil t))
+
+
+;; ------------------------------------------------------------
+;; 空行をすべて削除する関数（Markdown 書き出し後の整形向け）
+;; ------------------------------------------------------------
+;; markdownに出力したバッファー内で使用することを想定している
+(defun my/remove-blank-lines ()
+  "Remove all blank lines in the current buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (flush-lines "^[[:space:]]*$")))
+
+;; C-c d で空行削除を実行
+(global-set-key (kbd "C-c d") 'my/remove-blank-lines)
+
+;; ----------------------------------------------------------
+;; Doom Themes の設定
+;; ----------------------------------------------------------
+(use-package doom-themes
+  ;; Italic / Bold をテーマ内で有効にする
+  :custom
+  (doom-themes-enable-italic t)
+  (doom-themes-enable-bold t)
+
+  ;; モードラインのバーの色をカスタム設定
+  :custom-face
+  (doom-modeline-bar ((t (:background "#6272a4"))))
+
+  ;; テーマを読み込む（t を渡すと確認なしで即時適用）
+  :config
+  (load-theme 'doom-badger t)
+
+  ;; Neotree（ファイルツリー）の配色を Doom 仕様に
+  (doom-themes-neotree-config)
+
+  ;; Org-mode 用の色設定を有効にする
+  (doom-themes-org-config))
+
+;; ----------------------------------------------------------
+;; Doom Modeline（ステータスライン）の設定
+;; ----------------------------------------------------------
+(use-package doom-modeline
+  :custom
+  ;; ファイル名表示形式：プロジェクトルートからの相対パス
+  (doom-modeline-buffer-file-name-style 'truncate-with-project)
+
+  ;; アイコン表示を有効にする（フォントが必要）
+  (doom-modeline-icon t)
+
+  ;; メジャーモードのアイコンは非表示
+  (doom-modeline-major-mode-icon nil)
+
+  ;; マイナーモード表示を非表示にして簡潔化
+  (doom-modeline-minor-modes nil)
+
+  :hook
+  ;; Emacs 初期化後に自動で doom-modeline を有効化
+  (after-init . doom-modeline-mode)
+
+  :config
+  ;; モードラインから行番号・列番号表示を削除（見た目をシンプルに）
+  (line-number-mode 0)
+  (column-number-mode 0))
+
+;; -------------------------------------------------------------
+;; カスタムテーマ・パッケージ情報の設定
+;; -------------------------------------------------------------
+(custom-set-variables
+ '(custom-safe-themes
+   '("b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" default))
+ '(package-selected-packages '(org doom-modeline doom-themes listen)))
+
+;; ----------------------------------------------------------
+;; GUIのツールバーを非表示にして画面を広く使う
+;; ----------------------------------------------------------
+(tool-bar-mode -1)
+
+;; -------------------------------------------------------------
+;; ウィンドウの透過設定（foreground 90%, background 80%）
+;; -------------------------------------------------------------
+(set-frame-parameter nil 'alpha '(95 . 80))
+(add-to-list 'default-frame-alist '(alpha . (95 . 80)))
+
+(defun my/org-insert-sections (start end levels prefix char)
+  "Insert sections from START to END with LEVELS characters (CHAR) and PREFIX.
+If PREFIX is empty, show a message and do nothing."
+  (interactive
+   (list (read-number "Start number: " 0)
+	 (read-number "End number: " 9)
+	 (read-number "Levels (number of characters): " 2)
+	 (read-string "Prefix: ")
+	 (read-char-choice "Choose character (*, -, +): " '(?* ?- ?+))))
+  (if (string-empty-p prefix)
+      (message "Please enter a prefix.")
+    (dotimes (i (1+ (- end start)))
+      (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
+
+(global-set-key (kbd "C-c i") 'my/org-insert-sections)
+
+(global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
+
+
+ (defun check-org-properties-block-recursively ()
+   "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
+   (interactive)
+   (let* ((directory (file-name-as-directory org-roam-directory))
+	  (total-files 0)
+	  (ok-files 0)
+	  (ng-files 0)
+	  (ng-files-list '()))
+     (dolist (file (directory-files-recursively directory "\\.org$"))
+       (setq total-files (1+ total-files))
+       (with-temp-buffer
+	 (insert-file-contents file)
+	 (goto-char (point-min))
+	 (if (and (re-search-forward ":PROPERTIES:" nil t)
+		  (re-search-forward ":ID:" nil t)
+		  (re-search-forward ":END:" nil t))
+	     (setq ok-files (1+ ok-files))
+	   (setq ng-files (1+ ng-files))
+	   (push file ng-files-list))))
+     ;; 結果を表示
+     (message "Total files: %d" total-files)
+     (message "OK files: %d" ok-files)
+     (message "NG files: %d" ng-files)
+     (when ng-files-list
+       (message "NG files list:")
+       (dolist (file ng-files-list)
+	 (message "%s" file)))))
+
+ ;; 関数をインタラクティブにするための設定
+ (provide 'check-org-properties-block-recursively)
 
 ;; neotreeのインストールと設定
 (use-package neotree
