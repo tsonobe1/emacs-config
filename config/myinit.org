@@ -472,6 +472,147 @@
     (global-set-key (kbd "C-c d") 'my/remove-blank-lines)
 
 #+end_src
+** task-time-calculate
+#+begin_src emacs-lisp
+  (defun my/org-add-node-link-property ()
+    "現在のエントリに 'node-link' プロパティを追加する（複数登録可）。
+    org-roam のノード補完を使ってリンクを選ぶ。"
+    (interactive)
+    (require 'org-roam)
+    (let* ((node (org-roam-node-read))
+	   (id (org-roam-node-id node))
+	   (title (org-roam-node-title node))
+	   (link (org-link-make-string (concat "id:" id) title))
+	   (current (org-entry-get nil "node-link")))
+      (if current
+	  (progn
+	    (org-set-property "node-link" (concat current ", " link))
+	    (message "プロパティ 'node-link' にリンク '%s' を追加しました。" link))
+	(org-set-property "node-link" link)
+	(message "'node-link' を '%s' に設定しました。" link))))
+
+
+  ;; キーバインドを設定 (org-modeだけで有効)
+  (with-eval-after-load 'org
+    (define-key org-mode-map (kbd "C-c C-x n") #'my/org-add-node-link-property ))
+
+
+
+
+  ;; ------------------------------------------------------------
+  ;; Effort プロパティで選べる時間を制限する
+  ;; ------------------------------------------------------------
+  (with-eval-after-load 'org
+    ;; Effort_ALL に列挙した値だけを C-c C-x e 時に補完
+    (setq org-global-properties
+	  '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00"))))
+
+
+  (with-eval-after-load 'org
+    ;; 時間文字列→分 に変換するために必要
+    (require 'org-duration)
+
+    ;; ------------------------------------------------------------
+    ;; Effort 設定時に30分以上なら「break down」を推奨する
+    ;; ------------------------------------------------------------
+    (defun my/org-check-effort-breakdown (&rest _args)
+      "Effort プロパティを設定した後に呼ばれ、30分以上なら分割を促す。"
+      (when-let* ((effort-str (org-entry-get nil "Effort"))
+		  (min         (org-duration-to-minutes effort-str)))
+	(when (>= min 30)
+	  (message
+	   "⚠️ Effort が %d 分です。タスクを30分未満に分割（break down）することを検討してください。"
+	   min))))
+
+    ;; org-set-effort 実行後にチェック
+    (advice-add 'org-set-effort :after #'my/org-check-effort-breakdown))
+
+
+  (with-eval-after-load 'org
+    (require 'org-duration)
+
+    (defcustom my/org-effort-diff-threshold 10
+      "Effort と CLOCK 合計の差がこれ（分）を超えたときに理由を聞く。"
+      :type 'integer)
+
+    (defcustom my/org-effort-diff-property "WhyDiff"
+      "差異の理由を記録する PROPERTIES のキー。"
+      :type 'string)
+
+    ;; LOGBOOK 内の CLOCK: 行を合計して分で返すヘルパー
+    (defun my/org-get-logbook-total-minutes ()
+      "現在のエントリのLOGBOOK内CLOCK合計を分単位で返す。"
+      (save-excursion
+	(let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+	       (log-start
+		(when (re-search-forward "^:LOGBOOK:" subtree-end t)
+		  (forward-line 1) (point)))
+	       (log-end
+		(when log-start
+		  (save-excursion
+		    (goto-char log-start)
+		    (re-search-forward "^:END:" subtree-end t)
+		    (match-beginning 0))))
+	       (sum 0))
+	  (when (and log-start log-end)
+	    (goto-char log-start)
+	    (while (re-search-forward
+		    "^CLOCK:.*=>[ \t]*\\([0-9]+\\):\\([0-9]+\\)"
+		    log-end t)
+	      (let ((h (string-to-number (match-string 1)))
+		    (m (string-to-number (match-string 2))))
+		(setq sum (+ sum (+ (* 60 h) m))))))
+	  sum)))
+
+    ;; Effort vs CLOCK 差異チェック本体
+    (defun my/org-check-effort-diff ()
+      "TODO→DONE 時に Effort と CLOCK 合計を比較し、差が大きければ理由を記録。"
+      (when (and (string= org-state "DONE")
+		 (org-entry-get nil "Effort"))
+	(let* ((effort-min (org-duration-to-minutes (org-entry-get nil "Effort")))
+	       (total-min  (my/org-get-logbook-total-minutes))
+	       (diff       (- total-min effort-min)))
+	  (message "[EffortDiff] effort=%d 分, total=%d 分, diff=%+d 分"
+		   effort-min total-min diff)
+	  (when (> (abs diff) my/org-effort-diff-threshold)
+	    (let ((reason
+		   (read-string
+		    (format "effort:%d分, total:%d分, diff:%+d分 Why?: "
+			    effort-min total-min diff my/org-effort-diff-threshold))))
+	      (org-entry-put nil my/org-effort-diff-property reason))))))
+
+    ;; DONE への状態変更後にフック登録
+    (add-hook 'org-after-todo-state-change-hook #'my/org-check-effort-diff))
+
+(defun my-clocktable-write-reorder (&rest args)
+  "Org clocktable をデフォルト出力したあと、
+列を Headline | Effort | Time | … | % | WhyDiff の順に並べ替える。"
+  ;; 1) まずはデフォルトの表を書き出す
+  (apply #'org-clocktable-write-default args)
+
+  ;; 2) その後、出力されたバッファ上で列を入れ替える
+  (save-excursion
+    (goto-char (point-min))
+    ;; ── ヘッダー行の「Effort」がある行を検索
+    (when (re-search-forward "^| *Effort *|" nil t)
+      (beginning-of-line)
+
+      ;; (a) Effort(1列目) を Headline(3列目) の後ろへ移動
+      (dotimes (_ 2)
+        (org-table-move-column-right))
+
+      ;; (b) 残った最左列（元 WhyDiff）を末尾へ移動
+      (let* ((line  (buffer-substring (line-beginning-position)
+                                      (line-end-position)))
+             ;; "|" で分割 → セル数を数える
+             (cols  (length (split-string line "|" t)))
+             ;; 現在は1列目なので、末尾まで動かす回数 = cols−1
+             (moves (1- cols)))
+        (org-table-goto-column 1)
+        (dotimes (_ moves)
+          (org-table-move-column-right))))))
+
+#+end_src
 * appearance
 ** theme
   #+BEGIN_SRC emacs-lisp
