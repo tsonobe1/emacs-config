@@ -39,8 +39,8 @@
 ;; 使用するパッケージアーカイブ（リポジトリ）を設定
 ;; MELPA は多数の最新パッケージを含んでいるので特に重要
 (setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-	("melpa" . "http://melpa.org/packages/")))
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+	("melpa" . "https://melpa.org/packages/")))
 
 ;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
 (package-initialize)
@@ -748,3 +748,70 @@ If PREFIX is empty, show a message and do nothing."
   (add-to-list 'org-structure-template-alist
 	       ;; <ai + tab --> #+begin_ai
 	       '("ai" . "ai")))
+
+(require 'package)
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("gnu"   . "https://elpa.gnu.org/packages/")))
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+;; 必要なパッケージを自動インストールする関数
+(defvar my-required-packages
+  '(vertico marginalia orderless consult embark embark-consult savehist)
+  "List of packages to ensure are installed at launch.")
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(dolist (pkg my-required-packages)
+  (unless (package-installed-p pkg)
+    (package-install pkg)))
+
+;; 補完スタイルにorderlessを利用する
+(with-eval-after-load 'orderless
+  (setq completion-styles '(orderless)))
+
+;; 補完候補を最大20行まで表示する
+(setq vertico-count 20)
+
+;; vertico-modeとmarginalia-modeを有効化する
+(defun my/enable-completion-enhancements ()
+  (vertico-mode)
+  ;; savehist-modeを使ってVerticoの順番を永続化する
+  (savehist-mode))
+(add-hook 'after-init-hook #'my/enable-completion-enhancements)
+
+;; Marginaliaの設定
+;; Enable rich annotations using the Marginalia package
+(use-package marginalia
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init section is always executed.
+  :init
+
+  ;; Marginalia must be activated in the :init section of use-package such that
+  ;; the mode gets enabled right away. Note that this forces loading the
+  ;; package.
+  (marginalia-mode))
+
+;; embark-consultを読み込む
+(with-eval-after-load 'consult
+  (with-eval-after-load 'embark
+    (require 'embark-consult)))
+
+;; orderlessの設定
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
+(require 'orderless)
+(setq completion-styles '(orderless basic)
+      completion-category-overrides '((file (styles basic partial-completion))))
