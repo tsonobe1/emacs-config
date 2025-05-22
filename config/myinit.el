@@ -815,3 +815,73 @@ If PREFIX is empty, show a message and do nothing."
 (require 'orderless)
 (setq completion-styles '(orderless basic)
       completion-category-overrides '((file (styles basic partial-completion))))
+
+(defvar my/fibonacci-points '(1 2 3 5 8 13 21 34 55 89))
+
+(defun my/org-set-story-point ()
+  "Prompt for storypoint from Fibonacci values and set it as a property."
+  (interactive)
+  (let* ((choices (mapcar #'number-to-string my/fibonacci-points))
+	 (choice (completing-read "Storypoint: " choices nil t)))
+    (org-set-property "storypoint" choice)))
+
+(defun my/org--get-storypoint ()
+  "Get storypoint as number, or nil if not set or invalid."
+  (let ((val (org-entry-get (point) "storypoint")))
+    (when (and val (string-match-p "^[0-9]+$" val))
+      (string-to-number val))))
+
+(defun my/org--get-effort-from-point (base-point base-minutes)
+  "Compute effort string like 0:05 for a given point and base."
+  (let ((total (* base-minutes base-point)))
+    (format "%d:%02d" (/ total 60) (% total 60))))
+
+(defun my/org-assign-efforts-based-on-storypoints (start end)
+  "Assign Effort properties to tasks in region based on storypoints."
+  (interactive "r")
+  (let ((entries '())
+	(min-point most-positive-fixnum))
+    ;; collect all storypoints
+    (save-excursion
+      (goto-char start)
+      (while (re-search-forward org-heading-regexp end t)
+	(let ((point-val (save-excursion (org-back-to-heading t)
+					 (my/org--get-storypoint))))
+	  (when point-val
+	    (push (cons (point-marker) point-val) entries)
+	    (setq min-point (min min-point point-val))))))
+    (if (null entries)
+	(message "No tasks with storypoint found.")
+      (let* ((time-options '("0:01" "0:03" "0:05" "0:10" "0:15" "0:30" "0:45" "1:00"))
+	     (base-choice (completing-read
+			   (format "Time for storypoint %d (min): " min-point)
+			   time-options nil t))
+	     (base-minutes (let* ((parts (split-string base-choice ":"))
+				  (h (string-to-number (car parts)))
+				  (m (string-to-number (cadr parts))))
+			     (+ (* h 60) m)))
+	     (total-effort-minutes 0))
+	;; assign Effort properties
+	(dolist (entry entries)
+	  (let ((marker (car entry))
+		(point-val (cdr entry)))
+	    (with-current-buffer (marker-buffer marker)
+	      (goto-char marker)
+	      (let ((effort (my/org--get-effort-from-point point-val base-minutes)))
+		(org-set-property "Effort" effort)
+		(let* ((parts (split-string effort ":"))
+		       (effort-min (+ (* 60 (string-to-number (car parts)))
+				      (string-to-number (cadr parts)))))
+		  (setq total-effort-minutes (+ total-effort-minutes effort-min))))))
+
+	;; 最上位の見出しに合計Effortをセット
+	(save-excursion
+	  (goto-char start)
+	  (org-back-to-heading t)
+	  (let ((total (format "%d:%02d" (/ total-effort-minutes 60) (% total-effort-minutes 60))))
+	    (org-set-property "Effort" total)
+	    (message "Total effort: %s" total))))))))
+
+;; キーバインド
+(define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
+(define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
