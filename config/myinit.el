@@ -243,97 +243,97 @@
 (setq org-log-done 'time)
 
 ;; -------------------------------------------------------------
-;; org-roam の導入と初期設定
-;; -------------------------------------------------------------
+    ;; org-roam の導入と初期設定
+    ;; -------------------------------------------------------------
 
-;; org-roam がインストールされていない場合はインストールする
-(unless (package-installed-p 'org-roam)
-  (package-refresh-contents)
-  (package-install 'org-roam))
+    ;; org-roam がインストールされていない場合はインストールする
+    (unless (package-installed-p 'org-roam)
+      (package-refresh-contents)
+      (package-install 'org-roam))
 
-;; org-roam を読み込む
-(require 'org-roam)
+    ;; org-roam を読み込む
+    (require 'org-roam)
 
-;; ノート保存ディレクトリの設定（OS に応じて切り替え）
-(setq org-roam-directory
-      (file-truename (if (eq system-type 'windows-nt)
-			 "C:/emacs-org/org-roam"
-		       "~/.emacs.d/org-roam")))
+    ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
+    (setq org-roam-directory
+	  (file-truename (if (eq system-type 'windows-nt)
+			     "C:/emacs-org/org-roam"
+			   "~/.emacs.d/org-roam")))
 
-;; データベースファイルの保存先を指定
-(setq org-roam-db-location
-      (if (eq system-type 'windows-nt)
-	  "C:/emacs-org/org-roam/org-roam.db"
-	"~/.emacs.d/org-roam/org-roam.db"))
+    ;; データベースファイルの保存先を指定
+    (setq org-roam-db-location
+	  (if (eq system-type 'windows-nt)
+	      "C:/emacs-org/org-roam/org-roam.db"
+	    "~/.emacs.d/org-roam/org-roam.db"))
 
-;; org-roam のデータベース同期を自動で行う
-(org-roam-db-autosync-mode)
+    ;; org-roam のデータベース同期を自動で行う
+    (org-roam-db-autosync-mode)
 
 
-;; -------------------------------------------------------------
-;; org-roam のキーバインド（主に C-c n で始まる）
-;; -------------------------------------------------------------
-(dolist (key-fn '(("C-c n f" . org-roam-node-find)
-		  ("C-c n i" . org-roam-node-insert)
-		  ("C-c n t" . org-roam-buffer-toggle)
-		  ("C-c n l" . org-roam-buffer-toggle)
-		  ("C-c n d" . org-roam-dailies-capture-date)
-		  ("C-c n g" . org-roam-graph)
-		  ("C-c n a" . org-roam-alias-add)
-		  ("C-c n r" . org-roam-ref-add)))
-  (global-set-key (kbd (car key-fn)) (cdr key-fn)))
+    ;; -------------------------------------------------------------
+    ;; org-roam のキーバインド（主に C-c n で始まる）
+    ;; -------------------------------------------------------------
+    (dolist (key-fn '(("C-c n f" . org-roam-node-find)
+		      ("C-c n i" . org-roam-node-insert)
+		      ("C-c n t" . org-roam-buffer-toggle)
+		      ("C-c n l" . org-roam-buffer-toggle)
+		      ("C-c n d" . org-roam-dailies-capture-date)
+		      ("C-c n g" . org-roam-graph)
+		      ("C-c n a" . org-roam-alias-add)
+		      ("C-c n r" . org-roam-ref-add)))
+      (global-set-key (kbd (car key-fn)) (cdr key-fn)))
 
-;; 他モードでも補完を有効に（例: org-capture など）
-(setq org-roam-completion-everywhere t)
+    ;; 他モードでも補完を有効に（例: org-capture など）
+    (setq org-roam-completion-everywhere t)
 
-;; -------------------------------------------------------------
-;; org-roam-capture-templates の設定
-;; 各カテゴリごとに保存場所・ファイル名・タグを指定
-;; -------------------------------------------------------------
-(setq org-roam-capture-templates
-      '(("d" "default" plain "%?"
-	 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
-	 :unnarrowed t)
+    ;; -------------------------------------------------------------
+    ;; org-roam-capture-templates の設定
+    ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
+    ;; -------------------------------------------------------------
+    (setq org-roam-capture-templates
+	  '(("d" "default" plain "%?"
+	     :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
+	     :unnarrowed t)
 
-	("n" "knowledge" plain "%?"
-	 :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
-	 :unnarrowed t)
+	    ("n" "knowledge" plain "%?"
+	     :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+	     :unnarrowed t)
 
-	("w" "work" plain "%?"
-	 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
-	 :unnarrowed t)
+	    ("w" "work" plain "%?"
+	     :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
+	     :unnarrowed t)
 
-	("t" "tool" plain "%?"
-	 :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
-	 :unnarrowed t)
+	    ("t" "tool" plain "%?"
+	     :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
+	     :unnarrowed t)
 
-	("r" "recipe" plain "%?"
-	 :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
-	 :unnarrowed t)
+	    ("r" "recipe" plain "%?"
+	     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
+1	     :unnarrowed t)
 
-	("m" "money" plain "%?"
-	 :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
-	 :unnarrowed t)
+	    ("m" "money" plain "%?"
+	     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
+	     :unnarrowed t)
 
-	("c" "discuss" plain "%?"
-	 :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
-	 :unnarrowed t)))
+	    ("c" "discuss" plain "%?"
+	     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
+	     :unnarrowed t)))
 
-;; -------------------------------------------------------------
-;; org-roam-dailies のテンプレート設定（日報用）
-;; -------------------------------------------------------------
-(setq org-roam-dailies-capture-templates
-      '(("d" "dailies" entry
-	 "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
-	 :target (file+head "%<%Y-%m-%d>.org"
-			    "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
+    ;; -------------------------------------------------------------
+    ;; org-roam-dailies のテンプレート設定（日報用）
+    ;; -------------------------------------------------------------
+    (setq org-roam-dailies-capture-templates
+	  '(("d" "dailies" entry
+	     "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+	     :target (file+head "%<%Y-%m-%d>.org"
+				"#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
 ;; org-captureをC-c cにバインド
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -818,70 +818,114 @@ If PREFIX is empty, show a message and do nothing."
 
 (defvar my/fibonacci-points '(1 2 3 5 8 13 21 34 55 89))
 
-(defun my/org-set-story-point ()
-  "Prompt for storypoint from Fibonacci values and set it as a property."
-  (interactive)
-  (let* ((choices (mapcar #'number-to-string my/fibonacci-points))
-	 (choice (completing-read "Storypoint: " choices nil t)))
-    (org-set-property "storypoint" choice)))
+    (defun my/org-set-story-point ()
+      "Prompt for storypoint from Fibonacci values and set it as a property."
+      (interactive)
+      (let* ((choices (mapcar #'number-to-string my/fibonacci-points))
+	     (choice (completing-read "Storypoint: " choices nil t)))
+	(org-set-property "Storypoint" choice)))
 
-(defun my/org--get-storypoint ()
-  "Get storypoint as number, or nil if not set or invalid."
-  (let ((val (org-entry-get (point) "storypoint")))
-    (when (and val (string-match-p "^[0-9]+$" val))
-      (string-to-number val))))
+    (defun my/org--get-storypoint ()
+      "Get storypoint as number, or nil if not set or invalid."
+      (let ((val (org-entry-get (point) "Storypoint")))
+	(when (and val (string-match-p "^[0-9]+$" val))
+	  (string-to-number val))))
 
-(defun my/org--get-effort-from-point (base-point base-minutes)
-  "Compute effort string like 0:05 for a given point and base."
-  (let ((total (* base-minutes base-point)))
-    (format "%d:%02d" (/ total 60) (% total 60))))
+    (defun my/org--get-effort-from-point (base-point base-minutes)
+      "Compute effort string like 0:05 for a given point and base."
+      (let ((total (* base-minutes base-point)))
+	(format "%d:%02d" (/ total 60) (% total 60))))
 
 (defun my/org-assign-efforts-based-on-storypoints (start end)
-  "Assign Effort properties to tasks in region based on storypoints."
+  "Assign Effort properties to child tasks based on storypoints.
+Also set total Effort and Storypoint on the top-level heading (excluding itself from aggregation)."
   (interactive "r")
   (let ((entries '())
-	(min-point most-positive-fixnum))
-    ;; collect all storypoints
+        (min-point most-positive-fixnum)
+        (total-storypoints 0)
+        (parent-marker (save-excursion
+                         (goto-char start)
+                         (org-back-to-heading t)
+                         (point-marker)))) ;; 親見出しの位置を記録
+
+    ;; collect all storypoints from children (excluding parent)
     (save-excursion
       (goto-char start)
       (while (re-search-forward org-heading-regexp end t)
-	(let ((point-val (save-excursion (org-back-to-heading t)
-					 (my/org--get-storypoint))))
-	  (when point-val
-	    (push (cons (point-marker) point-val) entries)
-	    (setq min-point (min min-point point-val))))))
+        (save-excursion
+          (org-back-to-heading t)
+          (let ((pos (point)))
+            (unless (= pos (marker-position parent-marker)) ;; 親を除外
+              (let ((point-val (my/org--get-storypoint)))
+                (when point-val
+                  (push (cons (point-marker) point-val) entries)
+                  (setq min-point (min min-point point-val))
+                  (setq total-storypoints (+ total-storypoints point-val)))))))))
+
     (if (null entries)
-	(message "No tasks with storypoint found.")
+        (message "No child tasks with Storypoint found.")
       (let* ((time-options '("0:01" "0:03" "0:05" "0:10" "0:15" "0:30" "0:45" "1:00"))
-	     (base-choice (completing-read
-			   (format "Time for storypoint %d (min): " min-point)
-			   time-options nil t))
-	     (base-minutes (let* ((parts (split-string base-choice ":"))
-				  (h (string-to-number (car parts)))
-				  (m (string-to-number (cadr parts))))
-			     (+ (* h 60) m)))
-	     (total-effort-minutes 0))
-	;; assign Effort properties
-	(dolist (entry entries)
-	  (let ((marker (car entry))
-		(point-val (cdr entry)))
-	    (with-current-buffer (marker-buffer marker)
-	      (goto-char marker)
-	      (let ((effort (my/org--get-effort-from-point point-val base-minutes)))
-		(org-set-property "Effort" effort)
-		(let* ((parts (split-string effort ":"))
-		       (effort-min (+ (* 60 (string-to-number (car parts)))
-				      (string-to-number (cadr parts)))))
-		  (setq total-effort-minutes (+ total-effort-minutes effort-min))))))
+             (base-choice (completing-read
+                           (format "Time for Storypoint %d (min): " min-point)
+                           time-options nil t))
+             (base-minutes (let* ((parts (split-string base-choice ":"))
+                                  (h (string-to-number (car parts)))
+                                  (m (string-to-number (cadr parts))))
+                             (+ (* h 60) m)))
+             (total-effort-minutes 0))
+        ;; assign Effort properties to each child
+        (dolist (entry entries)
+          (let ((marker (car entry))
+                (point-val (cdr entry)))
+            (with-current-buffer (marker-buffer marker)
+              (goto-char marker)
+              (let ((effort (my/org--get-effort-from-point point-val base-minutes)))
+                (org-set-property "Effort" effort)
+                (let* ((parts (split-string effort ":"))
+                       (effort-min (+ (* 60 (string-to-number (car parts)))
+                                      (string-to-number (cadr parts)))))
+                  (setq total-effort-minutes (+ total-effort-minutes effort-min)))))))
 
-	;; 最上位の見出しに合計Effortをセット
-	(save-excursion
-	  (goto-char start)
-	  (org-back-to-heading t)
-	  (let ((total (format "%d:%02d" (/ total-effort-minutes 60) (% total-effort-minutes 60))))
-	    (org-set-property "Effort" total)
-	    (message "Total effort: %s" total))))))))
+        ;; 親に合計をセット（自分自身の既存値は無視）
+        (with-current-buffer (marker-buffer parent-marker)
+          (goto-char parent-marker)
+          (let ((total (format "%d:%02d" (/ total-effort-minutes 60) (% total-effort-minutes 60))))
+            (org-set-property "Effort" total)
+            (org-set-property "Storypoint" (number-to-string total-storypoints))
+            (message "Total effort: %s, Total storypoints: %d" total total-storypoints)))))))
 
-;; キーバインド
-(define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
-(define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
+
+
+    ;; キーバインド
+    (define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
+    (define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
+
+(defun my/org-update-storypoint-progress-cookie ()
+    "子タスクからStorypointの進捗率を計算し、親見出しに x/y を表示する。
+  :COOKIE_DATA: は無視。タイトルに直接挿入。"
+    (interactive)
+    (save-excursion
+      (org-back-to-heading t)
+      (let ((element (org-element-at-point))
+	    (total 0)
+	    (done 0)
+	    (title (nth 4 (org-heading-components)))
+	    (end (org-element-property :end (org-element-at-point))))
+	;; 子のStorypointを集計
+	(while (re-search-forward org-heading-regexp end t)
+	  (let ((point (my/org--get-storypoint)))
+	    (when point
+	      (setq total (+ total point))
+	      (when (string= (org-get-todo-state) "DONE")
+		(setq done (+ done point))))))
+	;; タイトルを更新
+	(org-edit-headline
+	 (if (string-match "\\([（(]\\)?[0-9]+/[0-9]+\\([）)]\\)?" title)
+	     (replace-match (format "%d/%d" done total) t t title 0)
+	   (format "%s (%d/%d)" title done total))))))
+
+(defun my/org--get-storypoint ()
+  "現在の見出しの :Storypoint: を取得。なければ nil。"
+  (let ((val (org-entry-get (point) "Storypoint")))
+    (when (and val (string-match-p "^[0-9]+$" val))
+      (string-to-number val))))
