@@ -206,9 +206,11 @@
 	(setq flycheck-textlint-executable "C:/scoop/apps/nodejs16/current/bin/textlint.cmd") ;; textlintのパスを指定
 	(setq flycheck-textlint-config "C:/emacs-org/.textlintrc.json")) ;; 設定ファイルを指定
     ;; Macの場合
+    ;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは`設定ファイルのパスを指定`は無視されるため、ホームディレクトリにもjsonをおいている
+    ;; シンボリックリンクにする or グローバルな設定を反映する方法を調べたほうがいいだろう
     (progn
-      (setq flycheck-textlint-executable "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/textlint") ;; textlintのパスを指定（Homebrewなどでインストールした場合）
-      (setq flycheck-textlint-config "/Users/tsonobe/.emacs.d/.textlintrc.json"))) ;; 設定ファイルのパス
+      (setq flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint") ;; textlintのパスを指定（Homebrewなどでインストールした場合）
+      (setq flycheck-textlint-config "~/.emacs.d/.textlintrc.json"))) ;; 設定ファイルのパス
 
   ;; textlint を Flycheck のチェッカーとして定義する
   (flycheck-define-checker textlint
@@ -339,7 +341,7 @@
 	    ("r" "recipe" plain "%?"
 	     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
 				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
-1	     :unnarrowed t)
+	     :unnarrowed t)
 
 	    ("m" "money" plain "%?"
 	     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
@@ -349,7 +351,13 @@
 	    ("c" "discuss" plain "%?"
 	     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
 				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
-	     :unnarrowed t)))
+	     :unnarrowed t)
+       
+       ;; Hugo投稿用テンプレート（キー: h）
+      ("h" "hugo" plain "%?"
+      :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
+        "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
+       :unnarrowed t)))
 
     ;; -------------------------------------------------------------
     ;; org-roam-dailies のテンプレート設定（日報用）
@@ -383,7 +391,11 @@
 	  ("s" "Someday" entry (file+headline ,(if (eq system-type 'windows-nt)
 						   "C:\\emacs-org\\inbox.org"
 						 "~/.emacs.d/inbox.org") "🤔 Someday")
-	   "** SAMEDAY %?")))
+	   "** SAMEDAY %?")
+     ("h" "Hugo blog post" plain
+         (function my-org-hugo-new-post)
+         ""
+         :empty-lines 1)))
 #+END_SRC
 
 ** org agenda
@@ -976,9 +988,98 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
     (define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
     (define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
 
+(defun org-calc-progress ()
+  "現在の見出しツリーの Storypoint と Effort の進捗を算出し、ミニバッファ表示とクリップボードにコピーする。"
+  (interactive)
+  (let* ((total-sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
+         (total-eff-min
+          (let ((s (or (org-entry-get nil "Effort") "0:00")))
+            (org-duration-string-to-minutes s)))
+         (entries
+          (org-map-entries
+           (lambda ()
+             (let* ((sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
+                    (eff-min (org-duration-string-to-minutes
+                              (or (org-entry-get nil "Effort") "0:00"))))
+               (cons sp eff-min)))
+           "TODO=\"DONE\"" 'tree))
+         (done-sp (apply #'+ (mapcar #'car entries)))
+         (done-eff-min (apply #'+ (mapcar #'cdr entries)))
+         (sp-pct (if (> total-sp 0)
+                     (* 100.0 (/ done-sp (float total-sp)))
+                   0.0))
+         (eff-pct (if (> total-eff-min 0)
+                      (* 100.0 (/ done-eff-min (float total-eff-min)))
+                    0.0))
+         (result
+          (format "Storypoint: %.1f%% (%d/%d)  Effort: %.1f%% (%s/%s)"
+                  sp-pct done-sp total-sp
+                  eff-pct
+                  (org-duration-from-minutes done-eff-min)
+                  (org-duration-from-minutes total-eff-min))))
+    (message "%s" result)
+    (kill-new result)))
+
+;; org-calc-progress のキーバインドを C-c C-p に設定
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-p") #'org-calc-progress))
+
+
 
 #+end_src
 
 #+begin_src emacs-lisp
+;; ------------------------------------------------------------
+;; ox-hugo のインストールと設定（Org-roamからHugoへのエクスポート）
+;; ------------------------------------------------------------
+(use-package ox-hugo
+  :ensure t
+  :after ox
+  :config
+  ;; org-roam と ox-hugo を連携して使う際のオプションを推奨設定
+(setq org-hugo-base-dir "~/devs/tsono-blog")
+  (setq org-hugo-section "posts")) ;; デフォルトのセクションを "posts" に設定
+
+;; Org-roamノードを ox-hugo でエクスポートするショートカット
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
+
+
+;;──────────────────────────────────────────────
+;; Hugo 用 Org-capture テンプレートの追加
+;;──────────────────────────────────────────────
+
+(require 'ox-hugo)
+
+(defconst my/hugo-blog-dir
+  (expand-file-name "~/devs/tsono-blog/content/posts/")
+  "Hugo サイトの content/posts/ ディレクトリへの絶対パス（末尾にスラッシュ付き）")
+
+(defun my-org-hugo-new-post ()
+  "Create a new Hugo post directory and open an org file inside it."
+  (let* ((title (read-string "Post title: "))
+         (date (format-time-string "%Y%m%d"))
+         (datetime (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (slug (replace-regexp-in-string
+                "_+" "_"
+                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" title)))
+         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s_%s" date slug)))
+         (file (expand-file-name "index.org" dir)))
+    (make-directory dir t)
+    (unless (file-exists-p file)
+      (with-temp-buffer
+        (insert (format "#+TITLE: %s\n" title))
+        (insert (format "#+DATE: %s\n" datetime))
+        (insert "#+HUGO_AUTO_SET_LASTMOD: t\n")
+        (insert "#+DESCRIPTION:\n")
+        (insert "#+TAGS:\n")
+        (insert "#+CATEGORIES:\n")
+        (insert "#+DRAFT: false\n")
+        (write-file file)))
+    (find-file file)
+    (goto-char (point-max))))
+
 
 #+end_src
+
+

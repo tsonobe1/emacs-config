@@ -189,9 +189,11 @@
       (setq flycheck-textlint-executable "C:/scoop/apps/nodejs16/current/bin/textlint.cmd") ;; textlintのパスを指定
       (setq flycheck-textlint-config "C:/emacs-org/.textlintrc.json")) ;; 設定ファイルを指定
   ;; Macの場合
+  ;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは`設定ファイルのパスを指定`は無視されるため、ホームディレクトリにもjsonをおいている
+  ;; シンボリックリンクにする or グローバルな設定を反映する方法を調べたほうがいいだろう
   (progn
-    (setq flycheck-textlint-executable "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/textlint") ;; textlintのパスを指定（Homebrewなどでインストールした場合）
-    (setq flycheck-textlint-config "/Users/tsonobe/.emacs.d/.textlintrc.json"))) ;; 設定ファイルのパス
+    (setq flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint") ;; textlintのパスを指定（Homebrewなどでインストールした場合）
+    (setq flycheck-textlint-config "~/.emacs.d/.textlintrc.json"))) ;; 設定ファイルのパス
 
 ;; textlint を Flycheck のチェッカーとして定義する
 (flycheck-define-checker textlint
@@ -243,97 +245,103 @@
 (setq org-log-done 'time)
 
 ;; -------------------------------------------------------------
-    ;; org-roam の導入と初期設定
-    ;; -------------------------------------------------------------
+;; org-roam の導入と初期設定
+;; -------------------------------------------------------------
 
-    ;; org-roam がインストールされていない場合はインストールする
-    (unless (package-installed-p 'org-roam)
-      (package-refresh-contents)
-      (package-install 'org-roam))
+;; org-roam がインストールされていない場合はインストールする
+(unless (package-installed-p 'org-roam)
+  (package-refresh-contents)
+  (package-install 'org-roam))
 
-    ;; org-roam を読み込む
-    (require 'org-roam)
+;; org-roam を読み込む
+(require 'org-roam)
 
-    ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
-    (setq org-roam-directory
-	  (file-truename (if (eq system-type 'windows-nt)
-			     "C:/emacs-org/org-roam"
-			   "~/.emacs.d/org-roam")))
+;; ノート保存ディレクトリの設定（OS に応じて切り替え）
+(setq org-roam-directory
+      (file-truename (if (eq system-type 'windows-nt)
+			 "C:/emacs-org/org-roam"
+		       "~/.emacs.d/org-roam")))
 
-    ;; データベースファイルの保存先を指定
-    (setq org-roam-db-location
-	  (if (eq system-type 'windows-nt)
-	      "C:/emacs-org/org-roam/org-roam.db"
-	    "~/.emacs.d/org-roam/org-roam.db"))
+;; データベースファイルの保存先を指定
+(setq org-roam-db-location
+      (if (eq system-type 'windows-nt)
+	  "C:/emacs-org/org-roam/org-roam.db"
+	"~/.emacs.d/org-roam/org-roam.db"))
 
-    ;; org-roam のデータベース同期を自動で行う
-    (org-roam-db-autosync-mode)
+;; org-roam のデータベース同期を自動で行う
+(org-roam-db-autosync-mode)
 
 
-    ;; -------------------------------------------------------------
-    ;; org-roam のキーバインド（主に C-c n で始まる）
-    ;; -------------------------------------------------------------
-    (dolist (key-fn '(("C-c n f" . org-roam-node-find)
-		      ("C-c n i" . org-roam-node-insert)
-		      ("C-c n t" . org-roam-buffer-toggle)
-		      ("C-c n l" . org-roam-buffer-toggle)
-		      ("C-c n d" . org-roam-dailies-capture-date)
-		      ("C-c n g" . org-roam-graph)
-		      ("C-c n a" . org-roam-alias-add)
-		      ("C-c n r" . org-roam-ref-add)))
-      (global-set-key (kbd (car key-fn)) (cdr key-fn)))
+;; -------------------------------------------------------------
+;; org-roam のキーバインド（主に C-c n で始まる）
+;; -------------------------------------------------------------
+(dolist (key-fn '(("C-c n f" . org-roam-node-find)
+		  ("C-c n i" . org-roam-node-insert)
+		  ("C-c n t" . org-roam-buffer-toggle)
+		  ("C-c n l" . org-roam-buffer-toggle)
+		  ("C-c n d" . org-roam-dailies-capture-date)
+		  ("C-c n g" . org-roam-graph)
+		  ("C-c n a" . org-roam-alias-add)
+		  ("C-c n r" . org-roam-ref-add)))
+  (global-set-key (kbd (car key-fn)) (cdr key-fn)))
 
-    ;; 他モードでも補完を有効に（例: org-capture など）
-    (setq org-roam-completion-everywhere t)
+;; 他モードでも補完を有効に（例: org-capture など）
+(setq org-roam-completion-everywhere t)
 
-    ;; -------------------------------------------------------------
-    ;; org-roam-capture-templates の設定
-    ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
-    ;; -------------------------------------------------------------
-    (setq org-roam-capture-templates
-	  '(("d" "default" plain "%?"
-	     :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
-	     :unnarrowed t)
+;; -------------------------------------------------------------
+;; org-roam-capture-templates の設定
+;; 各カテゴリごとに保存場所・ファイル名・タグを指定
+;; -------------------------------------------------------------
+(setq org-roam-capture-templates
+      '(("d" "default" plain "%?"
+	 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
+	 :unnarrowed t)
 
-	    ("n" "knowledge" plain "%?"
-	     :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
-	     :unnarrowed t)
+	("n" "knowledge" plain "%?"
+	 :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+	 :unnarrowed t)
 
-	    ("w" "work" plain "%?"
-	     :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
-	     :unnarrowed t)
+	("w" "work" plain "%?"
+	 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
+	 :unnarrowed t)
 
-	    ("t" "tool" plain "%?"
-	     :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
-	     :unnarrowed t)
+	("t" "tool" plain "%?"
+	 :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
+	 :unnarrowed t)
 
-	    ("r" "recipe" plain "%?"
-	     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
-1	     :unnarrowed t)
+	("r" "recipe" plain "%?"
+	 :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
+	 :unnarrowed t)
 
-	    ("m" "money" plain "%?"
-	     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
-	     :unnarrowed t)
+	("m" "money" plain "%?"
+	 :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
+	 :unnarrowed t)
 
-	    ("c" "discuss" plain "%?"
-	     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
-	     :unnarrowed t)))
+	("c" "discuss" plain "%?"
+	 :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
+			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
+	 :unnarrowed t)
 
-    ;; -------------------------------------------------------------
-    ;; org-roam-dailies のテンプレート設定（日報用）
-    ;; -------------------------------------------------------------
-    (setq org-roam-dailies-capture-templates
-	  '(("d" "dailies" entry
-	     "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
-	     :target (file+head "%<%Y-%m-%d>.org"
-				"#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
+   ;; Hugo投稿用テンプレート（キー: h）
+  ("h" "hugo" plain "%?"
+  :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
+    "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
+   :unnarrowed t)))
+
+;; -------------------------------------------------------------
+;; org-roam-dailies のテンプレート設定（日報用）
+;; -------------------------------------------------------------
+(setq org-roam-dailies-capture-templates
+      '(("d" "dailies" entry
+	 "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+	 :target (file+head "%<%Y-%m-%d>.org"
+			    "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
 ;; org-captureをC-c cにバインド
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -355,7 +363,11 @@
 	("s" "Someday" entry (file+headline ,(if (eq system-type 'windows-nt)
 						 "C:\\emacs-org\\inbox.org"
 					       "~/.emacs.d/inbox.org") "🤔 Someday")
-	 "** SAMEDAY %?")))
+	 "** SAMEDAY %?")
+   ("h" "Hugo blog post" plain
+       (function my-org-hugo-new-post)
+       ""
+       :empty-lines 1)))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の基本設定
@@ -900,32 +912,88 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
     (define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
     (define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
 
-(defun my/org-update-storypoint-progress-cookie ()
-    "子タスクからStorypointの進捗率を計算し、親見出しに x/y を表示する。
-  :COOKIE_DATA: は無視。タイトルに直接挿入。"
-    (interactive)
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((element (org-element-at-point))
-	    (total 0)
-	    (done 0)
-	    (title (nth 4 (org-heading-components)))
-	    (end (org-element-property :end (org-element-at-point))))
-	;; 子のStorypointを集計
-	(while (re-search-forward org-heading-regexp end t)
-	  (let ((point (my/org--get-storypoint)))
-	    (when point
-	      (setq total (+ total point))
-	      (when (string= (org-get-todo-state) "DONE")
-		(setq done (+ done point))))))
-	;; タイトルを更新
-	(org-edit-headline
-	 (if (string-match "\\([（(]\\)?[0-9]+/[0-9]+\\([）)]\\)?" title)
-	     (replace-match (format "%d/%d" done total) t t title 0)
-	   (format "%s (%d/%d)" title done total))))))
+(defun org-calc-progress ()
+  "現在の見出しツリーの Storypoint と Effort の進捗を算出し、ミニバッファ表示とクリップボードにコピーする。"
+  (interactive)
+  (let* ((total-sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
+         (total-eff-min
+          (let ((s (or (org-entry-get nil "Effort") "0:00")))
+            (org-duration-string-to-minutes s)))
+         (entries
+          (org-map-entries
+           (lambda ()
+             (let* ((sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
+                    (eff-min (org-duration-string-to-minutes
+                              (or (org-entry-get nil "Effort") "0:00"))))
+               (cons sp eff-min)))
+           "TODO=\"DONE\"" 'tree))
+         (done-sp (apply #'+ (mapcar #'car entries)))
+         (done-eff-min (apply #'+ (mapcar #'cdr entries)))
+         (sp-pct (if (> total-sp 0)
+                     (* 100.0 (/ done-sp (float total-sp)))
+                   0.0))
+         (eff-pct (if (> total-eff-min 0)
+                      (* 100.0 (/ done-eff-min (float total-eff-min)))
+                    0.0))
+         (result
+          (format "Storypoint: %.1f%% (%d/%d)  Effort: %.1f%% (%s/%s)"
+                  sp-pct done-sp total-sp
+                  eff-pct
+                  (org-duration-from-minutes done-eff-min)
+                  (org-duration-from-minutes total-eff-min))))
+    (message "%s" result)
+    (kill-new result)))
 
-(defun my/org--get-storypoint ()
-  "現在の見出しの :Storypoint: を取得。なければ nil。"
-  (let ((val (org-entry-get (point) "Storypoint")))
-    (when (and val (string-match-p "^[0-9]+$" val))
-      (string-to-number val))))
+;; org-calc-progress のキーバインドを C-c C-p に設定
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-p") #'org-calc-progress))
+
+;; ------------------------------------------------------------
+;; ox-hugo のインストールと設定（Org-roamからHugoへのエクスポート）
+;; ------------------------------------------------------------
+(use-package ox-hugo
+  :ensure t
+  :after ox
+  :config
+  ;; org-roam と ox-hugo を連携して使う際のオプションを推奨設定
+(setq org-hugo-base-dir "~/devs/tsono-blog")
+  (setq org-hugo-section "posts")) ;; デフォルトのセクションを "posts" に設定
+
+;; Org-roamノードを ox-hugo でエクスポートするショートカット
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
+
+
+;;──────────────────────────────────────────────
+;; Hugo 用 Org-capture テンプレートの追加
+;;──────────────────────────────────────────────
+
+(require 'ox-hugo)
+
+(defconst my/hugo-blog-dir
+  (expand-file-name "~/devs/tsono-blog/content/posts/")
+  "Hugo サイトの content/posts/ ディレクトリへの絶対パス（末尾にスラッシュ付き）")
+
+(defun my-org-hugo-new-post ()
+  "Create a new Hugo post directory and open an org file inside it."
+  (let* ((title (read-string "Post title: "))
+         (date (format-time-string "%Y%m%d"))
+         (datetime (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (slug (replace-regexp-in-string
+                "_+" "_"
+                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" title)))
+         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s_%s" date slug)))
+         (file (expand-file-name "index.org" dir)))
+    (make-directory dir t)
+    (unless (file-exists-p file)
+      (with-temp-buffer
+        (insert (format "#+TITLE: %s\n" title))
+        (insert (format "#+DATE: %s\n" datetime))
+        (insert "#+HUGO_AUTO_SET_LASTMOD: t\n")
+        (insert "#+DESCRIPTION:\n")
+        (insert "#+TAGS:\n")
+        (insert "#+CATEGORIES:\n")
+        (insert "#+DRAFT: false\n")
+        (write-file file)))
+    (find-file file)
+    (goto-char (point-max))))
