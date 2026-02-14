@@ -844,12 +844,10 @@
 
 ;; 必要なパッケージを自動インストールする関数
 (defvar my-required-packages
-  '(vertico marginalia orderless consult embark embark-consult savehist)
+  '(vertico marginalia orderless consult embark embark-consult savehist compat)
   "List of packages to ensure are installed at launch.")
 
-(unless package-archive-contents
-  (package-refresh-contents))
-
+(require 'compat)
 (dolist (pkg my-required-packages)
   (unless (package-installed-p pkg)
     (package-install pkg)))
@@ -1036,50 +1034,316 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   :ensure t
   :after ox
   :config
-  ;; org-roam と ox-hugo を連携して使う際のオプションを推奨設定
-(setq org-hugo-base-dir "~/devs/tsono-blog")
-  (setq org-hugo-section "posts")) ;; デフォルトのセクションを "posts" に設定
+  ;; Hugo プロジェクトのベースディレクトリ
+  (setq org-hugo-base-dir "~/devs/tsono-blog")
+
+  ;; 開いている org ファイルのディレクトリにエクスポートする（ページバンドル対応）
+  (setq org-hugo-auto-set-export-dir t))
 
 ;; Org-roamノードを ox-hugo でエクスポートするショートカット
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
-
 
 ;;──────────────────────────────────────────────
 ;; Hugo 用 Org-capture テンプレートの追加
 ;;──────────────────────────────────────────────
 
 (require 'ox-hugo)
+(setq org-export-with-tags t)  ;; タグをエクスポート時に含める
+(setq org-hugo-front-matter-format 'yaml)
+
 
 (defconst my/hugo-blog-dir
   (expand-file-name "~/devs/tsono-blog/content/posts/")
   "Hugo サイトの content/posts/ ディレクトリへの絶対パス（末尾にスラッシュ付き）")
 
 (defun my-org-hugo-new-post ()
-  "Create a new Hugo post directory and open an org file inside it."
+  "Create a new Hugo post using ox-hugo in YYYY/MM/slug/index.org format."
   (let* ((title (read-string "Post title: "))
-         (date (format-time-string "%Y%m%d"))
-         (datetime (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (default-slug (replace-regexp-in-string
+                        "_+" "_"
+                        (replace-regexp-in-string "[^[:word:][:digit:]]" "_" (downcase title))))
+         (slug-input (read-string (format "Slug (default: %s): " default-slug) nil nil default-slug))
          (slug (replace-regexp-in-string
                 "_+" "_"
-                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" title)))
-         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s_%s" date slug)))
+                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" slug-input)))
+         (date (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (year (format-time-string "%Y"))
+         (month (format-time-string "%m"))
+         (bundle-path (format "%s/%s/%s" year month slug))  ; YYYY/MM/slug
+         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s" bundle-path)))
          (file (expand-file-name "index.org" dir)))
     (make-directory dir t)
     (unless (file-exists-p file)
       (with-temp-buffer
         (insert (format "#+TITLE: %s\n" title))
-        (insert (format "#+DATE: %s\n" datetime))
+        (insert "#+IMAGE:\n")
+        (insert (format "#+DATE: %s\n" date))
         (insert "#+HUGO_AUTO_SET_LASTMOD: t\n")
         (insert "#+DESCRIPTION:\n")
-        (insert "#+TAGS:\n")
-        (insert "#+CATEGORIES:\n")
+        (insert "#+HUGO_TAGS:\n")
+        (insert "#+HUGO_CATEGORIES:\n")
         (insert "#+DRAFT: false\n")
+        (insert "#+mermaid: false\n")
+        (insert (format "#+HUGO_BUNDLE: %s\n" bundle-path))
+        (insert "#+EXPORT_FILE_NAME: index\n")
         (write-file file)))
     (find-file file)
     (goto-char (point-max))))
 
 
+
+(use-package org-download
+  :after org
+  :config
+  ;; 画像は現在開いている org ファイルと同じディレクトリに保存
+  (setq org-download-method 'directory)
+  (setq org-download-image-dir "./") ; 現在のorgファイルと同じ場所
+  (setq org-download-screenshot-method "screencapture -i %s") ;; macOSの場合
+
+  ;; ドラッグ＆ドロップされた画像はファイルとして保存される
+  (add-hook 'dired-mode-hook 'org-download-enable)
+  (add-hook 'org-mode-hook 'org-download-enable))
+(setq org-startup-with-inline-images nil)
+  (setq org-image-actual-width '(600)) ;; インラインされる画像の幅を600pxに設定
+
+  ;; Org-modeで画像を挿入するためのキーバインド 後でちゃんと設定する
+  ;; (define-key org-mode-map (kbd "C-c C-x i") 'org-download-clipboard)
+  ;; (define-key org-mode-map (kbd "C-c C-x s") 'org-download-screenshot))
+
+;; <img + TAB> で画像挿入のテンプレートを追加
+(add-to-list 'org-structure-template-alist
+             '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))
+
 #+end_src
 
 
+#+begin_src emacs-lisp
+(with-eval-after-load 'ox-hugo
+  (require 'cl-lib)
+
+  ;; 値から生URLだけを取り出す: <https://…> / https://… / ![](https://…)
+  (defun my/ox-hugo--extract-url (s)
+    (cond
+     ((string-match "!\\[[^]]*\\](\\(https?://[^)[:space:]]+\\))" s)
+      (match-string 1 s))
+     ((string-match "<\\(https?://[^>[:space:]]+\\)>" s)
+      (match-string 1 s))
+     ((string-match "\\(https?://[^[:space:]]+\\)" s)
+      (match-string 1 s))
+     (t nil)))
+
+  ;; タイトル/説明用の値を整形: 前後空白/引用符/<>を剥がし、" は &quot; に
+  (defun my/ox-hugo--extract-text (s)
+    (let ((txt (string-trim s)))
+      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (when (string-match "\\`<\\(.*\\)>\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (setq txt (replace-regexp-in-string "\"" "&quot;" txt))
+      txt))
+
+  (defun my/ox-hugo-linkcard-paragraph-filter (text backend info)
+    "段落を Hugo の linkcard に変換する。
+- 段落が key=value 行のみで、url= がある → {{< linkcard url=… [image=…] [title=…] [description=…] >}}
+- 単独URL段落                   → {{< linkcard \"…\" >}}"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim  (string-trim text))
+             (lines (split-string trim "\n+" t))
+             url image title description)
+
+        ;; key=value を抽出（前後空白OK）
+        (dolist (l lines)
+          (cond
+           ((string-match "\\`url\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq url (my/ox-hugo--extract-url (match-string 1 l))))
+           ((string-match "\\`image\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq image (my/ox-hugo--extract-url (match-string 1 l))))
+           ((string-match "\\`title\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq title (my/ox-hugo--extract-text (match-string 1 l))))
+           ((string-match "\\`description\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq description (my/ox-hugo--extract-text (match-string 1 l))))))
+
+        (cond
+         ;; 1) key=value だけで構成 & url がある → 名前付き引数版
+         ((and url
+               (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines))
+          (concat "{{< linkcard"
+                  (format " url=\"%s\"" url)
+                  (when image (format " image=\"%s\"" image))
+                  (when title (format " title=\"%s\"" title))
+                  (when description (format " description=\"%s\"" description))
+                  " >}}\n"))
+
+         ;; 2) 単独URL段落（<…> / 裸URL） → 位置引数版
+         ((or (string-match "\\`<https?://[^>[:space:]]+>\\'" trim)
+              (string-match "\\`https?://[^[:space:]]+\\'" trim))
+          (let ((u (my/ox-hugo--extract-url trim)))
+            (if u (format "{{< linkcard \"%s\" >}}\n" u) text)))
+
+         ;; 3) それ以外はそのまま
+         (t text)))))
+
+  ;; フック登録
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-linkcard-paragraph-filter))
+
+
+;; ------------------------------
+;; figure: key=value 段落から Hugo の figure を生成（新規追加）
+;; ------------------------------
+(with-eval-after-load 'ox-hugo
+  (require 'cl-lib)
+
+  ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
+  (defun my/ox-hugo--extract-src (s)
+    (let ((txt (string-trim s)))
+      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (when (string-match "\\`<\\(.*\\)>\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (cond
+       ;; [[file:/path/to/image.jpg]]
+       ((string-match "\\[\\[file:\\([^]]+\\)\\]\\]" txt)
+        (match-string 1 txt))
+       ;; http/https
+       ((string-match "\\`https?://[^[:space:]]+\\'" txt)
+        txt)
+       ;; それ以外はパスとして返す
+       (t txt))))
+
+  (defun my/ox-hugo--quote (s)
+    "Hugo shortcode 用に値を \"…\" で括り、内部の \" を &quot; に。"
+    (format "\"%s\"" (replace-regexp-in-string "\"" "&quot;" s)))
+
+  (defun my/ox-hugo-figure-paragraph-filter (text backend info)
+    "段落が key=value 行のみで src= が含まれる場合、
+{{< figure src=... [caption=...] [title=...] [alt=...] [width=...] >}} に変換。
+単独の [[file:...]] 段落は手を加えず ox-hugo の既定動作に委ねる。"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim (string-trim text))
+             (lines (split-string trim "\n+" t)))
+        (cond
+         ;; 1) 単独の [[file:...]] だけ → 既定の変換に任せる
+         ((string-match "\\`\\[\\[file:[^]]+\\]\\]\\'" trim)
+          text)
+
+         ;; 2) key=value のみで構成 & src= を含む → figure 生成
+         ((and (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines)
+               (cl-some (lambda (l)
+                          (string-match-p "\\`src\\s-*=" l))
+                        lines))
+          (let (src caption title alt width)
+            ;; 値を収集（caption/title/alt/width は引用符付きでもOK）
+            (dolist (l lines)
+              (cond
+               ((string-match "\\`src\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq src (my/ox-hugo--extract-src (match-string 1 l))))
+               ((string-match "\\`caption\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq caption (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`title\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq title (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`alt\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq alt (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`width\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq width (my/ox-hugo--extract-text (match-string 1 l))))))
+
+            (when src
+              ;; 先頭スラッシュ補正（相対パスを /path にしたい場合）
+              (when (and (not (string-match-p "\\`https?://" src))
+                         (not (string-prefix-p "/" src)))
+                (setq src (concat "/" src)))
+              (concat "{{< figure"
+                      (format " src=%s" (my/ox-hugo--quote src))
+                      (when caption (format " caption=%s" (my/ox-hugo--quote caption)))
+                      (when title   (format " title=%s"   (my/ox-hugo--quote title)))
+                      (when alt     (format " alt=%s"     (my/ox-hugo--quote alt)))
+                      (when width   (format " width=%s"   (my/ox-hugo--quote width)))
+                      " >}}\n"))))
+
+         ;; 3) それ以外はそのまま
+         (t text)))))
+
+  ;; Hook 追加（この add-hook が linkcard より後に評価される想定。
+  ;; デフォルトで先頭に追加されるため、実行順は figure → linkcard）
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-figure-paragraph-filter))
+
+(with-eval-after-load 'ox-hugo
+  (defun my/ox-hugo-video-paragraph-filter (text backend info)
+    "段落が key=value 行のみで video= が含まれる場合、{{< video src=... [width=...] >}} に変換。"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim  (string-trim text))
+             (lines (split-string trim "\n+" t)))
+        (cond
+         ((and (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines)
+               (cl-some (lambda (l)
+                          (string-match-p "\\`video\\s-*=" l))
+                        lines))
+          (let (video width)
+            (dolist (l lines)
+              (cond
+               ((string-match "\\`video\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq video (my/ox-hugo--extract-src (match-string 1 l))))
+               ((string-match "\\`width\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq width (my/ox-hugo--extract-text (match-string 1 l))))))
+            (when video
+              (concat "{{< video"
+                      (format " src=%s" (my/ox-hugo--quote video))
+                      (when width (format " width=%s" (my/ox-hugo--quote width)))
+                      " >}}\n"))))
+         (t text)))))
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-video-paragraph-filter))
+
+
+
+(with-eval-after-load 'ox-hugo
+  ;; mermaid ソースブロックを Markdown の ```mermaid フェンスコードに変換
+  (defun my/ox-hugo-src-block-filter (text backend info)
+    "Convert #+begin_src mermaid ... #+end_src into ```mermaid fenced code."
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let ((trim (string-trim text)))
+        ;; Org の src block はすでに text に code 部分だけが入っている
+        (when (string= (org-element-property :language (car (org-export-get-parent-element info))) "mermaid")
+          (concat "```mermaid\n" trim "\n```")))))
+
+  (add-hook 'org-export-filter-src-block-functions
+            #'my/ox-hugo-src-block-filter))
+
+;; エクスポート時にソースコードを実行しない
+(setq org-export-use-babel nil)
+
+;; ox-hugo で export する直前に、#+mermaid: を HUGO front matter に昇格
+(with-eval-after-load 'ox-hugo
+  (defun my/ox-hugo-promote-mermaid (backend)
+    "Promote `#+mermaid: true/false` to Hugo front matter via
+`#+HUGO_CUSTOM_FRONT_MATTER: :mermaid true/false` on ox-hugo export."
+    (when (org-export-derived-backend-p backend 'hugo)
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^#\\+mermaid:\\s-*\\(.*\\)$" nil t)
+          (let* ((raw (downcase (string-trim (match-string 1))))
+                 (bool (member raw '("t" "true" "yes" "on" "1")))
+                 (newline (concat "#+HUGO_CUSTOM_FRONT_MATTER: :mermaid "
+                                  (if bool "true" "false") "\n")))
+            ;; 元の #+mermaid: 行は削除
+            (beginning-of-line)
+            (kill-whole-line)
+            ;; 挿入位置：既存のヘッダ行群の直後（TITLE/DATE/HUGO_* 等の後）
+            (goto-char (point-min))
+            (while (looking-at "^#\\+\\(TITLE\\|AUTHOR\\|DATE\\|LASTMOD\\|DESCRIPTION\\|TAGS\\|CATEGORIES\\|DRAFT\\|HUGO_.*\\|EXPORT_FILE_NAME\\|IMAGE\\)\\b")
+              (forward-line 1))
+            (insert newline))))))
+
+  (add-hook 'org-export-before-processing-hook #'my/ox-hugo-promote-mermaid))
+
+
+
+#+end_src

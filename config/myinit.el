@@ -39,8 +39,8 @@
 ;; 使用するパッケージアーカイブ（リポジトリ）を設定
 ;; MELPA は多数の最新パッケージを含んでいるので特に重要
 (setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-	("melpa" . "https://melpa.org/packages/")))
+	  '(("gnu" . "https://elpa.gnu.org/packages/")
+	    ("melpa" . "https://melpa.org/packages/")))
 
 ;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
 (package-initialize)
@@ -73,20 +73,20 @@
 (unless (eq system-type 'windows-nt)
   (defvar bootstrap-version)
   (let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 7))
+	     (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	    (bootstrap-version 7))
 
-    ;; bootstrap.el が存在しない場合は、インターネットから取得してインストール
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
+	;; bootstrap.el が存在しない場合は、インターネットから取得してインストール
+	(unless (file-exists-p bootstrap-file)
+	  (with-current-buffer
+	      (url-retrieve-synchronously
+	       "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+	       'silent 'inhibit-cookies)
+	    (goto-char (point-max))
+	    (eval-print-last-sexp)))
 
-    ;; straight.el をロード
-    (load bootstrap-file nil 'nomessage)))
+	;; straight.el をロード
+	(load bootstrap-file nil 'nomessage)))
 
 ;; org-tempo を読み込むことで、<s TAB などのテンプレ展開が有効になる
 (require 'org-tempo)
@@ -95,9 +95,9 @@
 ;; Python 実行コマンドのパスを OS によって切り替える
 ;; Windows の場合と macOS/Linux の場合で別の仮想環境を指定
 (setq org-babel-python-command
-      (if (eq system-type 'windows-nt)
-	  "C:/emacs-org/env/bin/python"
-	"/Users/tsonobe/.emacs.d/env/bin/python"))
+	  (if (eq system-type 'windows-nt)
+	      "C:/emacs-org/env/bin/python"
+	    "/Users/tsonobe/.emacs.d/env/bin/python"))
 
 ;; Org Babel 実行時の確認プロンプトを無効にする
 (setq org-confirm-babel-evaluate nil)
@@ -153,8 +153,8 @@
 
 ;; org-mode のバッファで C-c t にこのトグル関数をバインドする
 (add-hook 'org-mode-hook
-	  (lambda ()
-	    (local-set-key (kbd "C-c t") 'my-toggle-truncate-lines)))
+	      (lambda ()
+		(local-set-key (kbd "C-c t") 'my-toggle-truncate-lines)))
 
 (unless (package-installed-p 'ob-mermaid)
   (package-refresh-contents)
@@ -163,7 +163,7 @@
 (if (eq system-type 'windows-nt)
     ;; Windowsの場合
     (progn
-      (setq ob-mermaid-cli-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"))
+	(setq ob-mermaid-cli-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"))
   ;; Macの場合
   (progn
     (setq ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")))
@@ -186,8 +186,8 @@
 (if (eq system-type 'windows-nt)
     ;; Windowsの場合
     (progn
-      (setq flycheck-textlint-executable "C:/scoop/apps/nodejs16/current/bin/textlint.cmd") ;; textlintのパスを指定
-      (setq flycheck-textlint-config "C:/emacs-org/.textlintrc.json")) ;; 設定ファイルを指定
+	(setq flycheck-textlint-executable "C:/scoop/apps/nodejs16/current/bin/textlint.cmd") ;; textlintのパスを指定
+	(setq flycheck-textlint-config "C:/emacs-org/.textlintrc.json")) ;; 設定ファイルを指定
   ;; Macの場合
   ;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは`設定ファイルのパスを指定`は無視されるため、ホームディレクトリにもjsonをおいている
   ;; シンボリックリンクにする or グローバルな設定を反映する方法を調べたほうがいいだろう
@@ -199,13 +199,13 @@
 (flycheck-define-checker textlint
   "A linter using textlint."
   :command ("textlint" "--format" "unix" 
-	    source-inplace) ; ファイルに対して直接チェックを実行
+	      source-inplace) ; ファイルに対して直接チェックを実行
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": "
-	    (id (one-or-more (not (any " ")))) ; エラーID
-	    (message (one-or-more not-newline)
-		     (zero-or-more "\n" (any " ") (one-or-more not-newline)))
-	    line-end))
+	      (id (one-or-more (not (any " ")))) ; エラーID
+	      (message (one-or-more not-newline)
+		       (zero-or-more "\n" (any " ") (one-or-more not-newline)))
+	      line-end))
   :modes (text-mode markdown-mode gfm-mode org-mode web-mode)) ; 対応モード
 
 ;; 定義した textlint チェッカーを Flycheck に追加
@@ -224,11 +224,11 @@
 (if (eq system-type 'windows-nt)
     ;; Windowsの場合
     (progn
-      ;; exec-path に Node.js のパスを追加
-      (setq exec-path (append '("C:/scoop/apps/nodejs16/current" "C:/scoop/apps/nodejs16/current/bin") exec-path))
+	;; exec-path に Node.js のパスを追加
+	(setq exec-path (append '("C:/scoop/apps/nodejs16/current" "C:/scoop/apps/nodejs16/current/bin") exec-path))
 
-      ;; 環境変数 PATH にも追加
-      (setenv "PATH" (concat "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;" (getenv "PATH"))))
+	;; 環境変数 PATH にも追加
+	(setenv "PATH" (concat "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;" (getenv "PATH"))))
 
   ;; macOSの場合
   (progn
@@ -239,7 +239,7 @@
     (setenv "PATH" (concat "/Users/tsonobe/.nodebrew/current/bin/node" (getenv "PATH")))))
 
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
+	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
 
 ;; Doneの時刻を記録する
 (setq org-log-done 'time)
@@ -258,15 +258,15 @@
 
 ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
 (setq org-roam-directory
-      (file-truename (if (eq system-type 'windows-nt)
-			 "C:/emacs-org/org-roam"
-		       "~/.emacs.d/org-roam")))
+	  (file-truename (if (eq system-type 'windows-nt)
+			     "C:/emacs-org/org-roam"
+			   "~/.emacs.d/org-roam")))
 
 ;; データベースファイルの保存先を指定
 (setq org-roam-db-location
-      (if (eq system-type 'windows-nt)
-	  "C:/emacs-org/org-roam/org-roam.db"
-	"~/.emacs.d/org-roam/org-roam.db"))
+	  (if (eq system-type 'windows-nt)
+	      "C:/emacs-org/org-roam/org-roam.db"
+	    "~/.emacs.d/org-roam/org-roam.db"))
 
 ;; org-roam のデータベース同期を自動で行う
 (org-roam-db-autosync-mode)
@@ -276,13 +276,13 @@
 ;; org-roam のキーバインド（主に C-c n で始まる）
 ;; -------------------------------------------------------------
 (dolist (key-fn '(("C-c n f" . org-roam-node-find)
-		  ("C-c n i" . org-roam-node-insert)
-		  ("C-c n t" . org-roam-buffer-toggle)
-		  ("C-c n l" . org-roam-buffer-toggle)
-		  ("C-c n d" . org-roam-dailies-capture-date)
-		  ("C-c n g" . org-roam-graph)
-		  ("C-c n a" . org-roam-alias-add)
-		  ("C-c n r" . org-roam-ref-add)))
+		      ("C-c n i" . org-roam-node-insert)
+		      ("C-c n t" . org-roam-buffer-toggle)
+		      ("C-c n l" . org-roam-buffer-toggle)
+		      ("C-c n d" . org-roam-dailies-capture-date)
+		      ("C-c n g" . org-roam-graph)
+		      ("C-c n a" . org-roam-alias-add)
+		      ("C-c n r" . org-roam-ref-add)))
   (global-set-key (kbd (car key-fn)) (cdr key-fn)))
 
 ;; 他モードでも補完を有効に（例: org-capture など）
@@ -293,41 +293,41 @@
 ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
 ;; -------------------------------------------------------------
 (setq org-roam-capture-templates
-      '(("d" "default" plain "%?"
-	 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
-	 :unnarrowed t)
+	  '(("d" "default" plain "%?"
+	     :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
+	     :unnarrowed t)
 
-	("n" "knowledge" plain "%?"
-	 :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
-	 :unnarrowed t)
+	    ("n" "knowledge" plain "%?"
+	     :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+	     :unnarrowed t)
 
-	("w" "work" plain "%?"
-	 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
-	 :unnarrowed t)
+	    ("w" "work" plain "%?"
+	     :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
+	     :unnarrowed t)
 
-	("t" "tool" plain "%?"
-	 :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
-	 :unnarrowed t)
+	    ("t" "tool" plain "%?"
+	     :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
+	     :unnarrowed t)
 
-	("r" "recipe" plain "%?"
-	 :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
-	 :unnarrowed t)
+	    ("r" "recipe" plain "%?"
+	     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
+	     :unnarrowed t)
 
-	("m" "money" plain "%?"
-	 :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
-	 :unnarrowed t)
+	    ("m" "money" plain "%?"
+	     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
+	     :unnarrowed t)
 
-	("c" "discuss" plain "%?"
-	 :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-			    "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
-	 :unnarrowed t)
-
+	    ("c" "discuss" plain "%?"
+	     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
+				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
+	     :unnarrowed t)
+   
    ;; Hugo投稿用テンプレート（キー: h）
   ("h" "hugo" plain "%?"
   :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
@@ -338,32 +338,32 @@
 ;; org-roam-dailies のテンプレート設定（日報用）
 ;; -------------------------------------------------------------
 (setq org-roam-dailies-capture-templates
-      '(("d" "dailies" entry
-	 "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
-	 :target (file+head "%<%Y-%m-%d>.org"
-			    "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
+	  '(("d" "dailies" entry
+	     "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+	     :target (file+head "%<%Y-%m-%d>.org"
+				"#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
 ;; org-captureをC-c cにバインド
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
 (setq org-capture-templates
-      `(("t" "Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
-					      "C:\\emacs-org\\inbox.org"
-					    "~/.emacs.d/inbox.org") "📥 INBOX")
-	 "** TODO %?")
-	("w" "Work Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
+	`(("t" "Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
+						"C:\\emacs-org\\inbox.org"
+					      "~/.emacs.d/inbox.org") "📥 INBOX")
+	   "** TODO %?")
+	  ("w" "Work Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
+						     "C:\\emacs-org\\inbox.org"
+						   "~/.emacs.d/inbox.org") "📥 INBOX")
+	   "** TODO %?  :work:")
+	  ("p" "Private Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
+							"C:\\emacs-org\\inbox.org"
+						      "~/.emacs.d/inbox.org") "📥 INBOX")
+	   "** TODO %?  :private:")
+	  ("s" "Someday" entry (file+headline ,(if (eq system-type 'windows-nt)
 						   "C:\\emacs-org\\inbox.org"
-						 "~/.emacs.d/inbox.org") "📥 INBOX")
-	 "** TODO %?  :work:")
-	("p" "Private Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
-						      "C:\\emacs-org\\inbox.org"
-						    "~/.emacs.d/inbox.org") "📥 INBOX")
-	 "** TODO %?  :private:")
-	("s" "Someday" entry (file+headline ,(if (eq system-type 'windows-nt)
-						 "C:\\emacs-org\\inbox.org"
-					       "~/.emacs.d/inbox.org") "🤔 Someday")
-	 "** SAMEDAY %?")
+						 "~/.emacs.d/inbox.org") "🤔 Someday")
+	   "** SAMEDAY %?")
    ("h" "Hugo blog post" plain
        (function my-org-hugo-new-post)
        ""
@@ -379,8 +379,8 @@
 ;; org-agenda に読み込ませるファイルを OS に応じて切り替え
 ;; ここでは inbox.org のみを対象
 (setq org-agenda-files (list (if (eq system-type 'windows-nt)
-				 "C:/emacs-org/inbox.org"
-			       "~/.emacs.d/inbox.org")))
+				   "C:/emacs-org/inbox.org"
+				 "~/.emacs.d/inbox.org")))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の表示に関する UI 設定
@@ -441,8 +441,8 @@
   "Remove all blank lines in the current buffer."
   (interactive)
   (save-excursion
-    (goto-char (point-min))
-    (flush-lines "^[[:space:]]*$")))
+	(goto-char (point-min))
+	(flush-lines "^[[:space:]]*$")))
 
 ;; C-c d で空行削除を実行
 (global-set-key (kbd "C-c d") 'my/remove-blank-lines)
@@ -658,14 +658,14 @@
 If PREFIX is empty, show a message and do nothing."
   (interactive
    (list (read-number "Start number: " 0)
-	 (read-number "End number: " 9)
-	 (read-number "Levels (number of characters): " 2)
-	 (read-string "Prefix: ")
-	 (read-char-choice "Choose character (*, -, +): " '(?* ?- ?+))))
+	     (read-number "End number: " 9)
+	     (read-number "Levels (number of characters): " 2)
+	     (read-string "Prefix: ")
+	     (read-char-choice "Choose character (*, -, +): " '(?* ?- ?+))))
   (if (string-empty-p prefix)
-      (message "Please enter a prefix.")
-    (dotimes (i (1+ (- end start)))
-      (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
+	  (message "Please enter a prefix.")
+	(dotimes (i (1+ (- end start)))
+	  (insert (format "%s %s %d\n" (make-string levels char) prefix (+ start i))))))
 
 (global-set-key (kbd "C-c i") 'my/org-insert-sections)
 
@@ -676,29 +676,29 @@ If PREFIX is empty, show a message and do nothing."
    "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
    (interactive)
    (let* ((directory (file-name-as-directory org-roam-directory))
-	  (total-files 0)
-	  (ok-files 0)
-	  (ng-files 0)
-	  (ng-files-list '()))
-     (dolist (file (directory-files-recursively directory "\\.org$"))
-       (setq total-files (1+ total-files))
-       (with-temp-buffer
-	 (insert-file-contents file)
-	 (goto-char (point-min))
-	 (if (and (re-search-forward ":PROPERTIES:" nil t)
-		  (re-search-forward ":ID:" nil t)
-		  (re-search-forward ":END:" nil t))
-	     (setq ok-files (1+ ok-files))
-	   (setq ng-files (1+ ng-files))
-	   (push file ng-files-list))))
-     ;; 結果を表示
-     (message "Total files: %d" total-files)
-     (message "OK files: %d" ok-files)
-     (message "NG files: %d" ng-files)
-     (when ng-files-list
-       (message "NG files list:")
-       (dolist (file ng-files-list)
-	 (message "%s" file)))))
+	      (total-files 0)
+	      (ok-files 0)
+	      (ng-files 0)
+	      (ng-files-list '()))
+	 (dolist (file (directory-files-recursively directory "\\.org$"))
+	   (setq total-files (1+ total-files))
+	   (with-temp-buffer
+	     (insert-file-contents file)
+	     (goto-char (point-min))
+	     (if (and (re-search-forward ":PROPERTIES:" nil t)
+		      (re-search-forward ":ID:" nil t)
+		      (re-search-forward ":END:" nil t))
+		 (setq ok-files (1+ ok-files))
+	       (setq ng-files (1+ ng-files))
+	       (push file ng-files-list))))
+	 ;; 結果を表示
+	 (message "Total files: %d" total-files)
+	 (message "OK files: %d" ok-files)
+	 (message "NG files: %d" ng-files)
+	 (when ng-files-list
+	   (message "NG files list:")
+	   (dolist (file ng-files-list)
+	     (message "%s" file)))))
 
  ;; 関数をインタラクティブにするための設定
  (provide 'check-org-properties-block-recursively)
@@ -713,10 +713,10 @@ If PREFIX is empty, show a message and do nothing."
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   ;; ディレクトリが更新されたら自動でneotreeをリフレッシュ
   (add-hook 'neo-after-create-hook
-	    (lambda (_)
-	      (with-current-buffer (get-buffer neo-buffer-name)
-		(setq truncate-lines t)
-		(setq word-wrap nil)))))
+	      (lambda (_)
+		(with-current-buffer (get-buffer neo-buffer-name)
+		  (setq truncate-lines t)
+		  (setq word-wrap nil)))))
 
 ;; all-the-iconsのインストールと設定
 (use-package all-the-icons
@@ -724,9 +724,9 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; secrets.elを読み込む
 (let ((secrets-file
-       (if (eq system-type 'windows-nt)
-	   "C:/emacs-org/config/secrets.el" ;; Windowsのパス
-	 "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
+	 (if (eq system-type 'windows-nt)
+	     "C:/emacs-org/config/secrets.el" ;; Windowsのパス
+	   "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
   (when (file-exists-p secrets-file)
     (load secrets-file)))
 
@@ -734,7 +734,7 @@ If PREFIX is empty, show a message and do nothing."
 (use-package org-ai
   :ensure t
   :commands (org-ai-mode
-	     org-ai-global-mode)
+	       org-ai-global-mode)
   :init
   ;; Org-mode バッファに入った時、自動で org-ai-mode を有効化
   (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
@@ -758,8 +758,8 @@ If PREFIX is empty, show a message and do nothing."
 ;; ----------------------------------------------------------
 (with-eval-after-load 'org
   (add-to-list 'org-structure-template-alist
-	       ;; <ai + tab --> #+begin_ai
-	       '("ai" . "ai")))
+		 ;; <ai + tab --> #+begin_ai
+		 '("ai" . "ai")))
 
 (require 'package)
 (setq package-archives
@@ -771,12 +771,10 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; 必要なパッケージを自動インストールする関数
 (defvar my-required-packages
-  '(vertico marginalia orderless consult embark embark-consult savehist)
+  '(vertico marginalia orderless consult embark embark-consult savehist compat)
   "List of packages to ensure are installed at launch.")
 
-(unless package-archive-contents
-  (package-refresh-contents))
-
+(require 'compat)
 (dolist (pkg my-required-packages)
   (unless (package-installed-p pkg)
     (package-install pkg)))
@@ -955,45 +953,308 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   :ensure t
   :after ox
   :config
-  ;; org-roam と ox-hugo を連携して使う際のオプションを推奨設定
-(setq org-hugo-base-dir "~/devs/tsono-blog")
-  (setq org-hugo-section "posts")) ;; デフォルトのセクションを "posts" に設定
+  ;; Hugo プロジェクトのベースディレクトリ
+  (setq org-hugo-base-dir "~/devs/tsono-blog")
+
+  ;; 開いている org ファイルのディレクトリにエクスポートする（ページバンドル対応）
+  (setq org-hugo-auto-set-export-dir t))
 
 ;; Org-roamノードを ox-hugo でエクスポートするショートカット
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
-
 
 ;;──────────────────────────────────────────────
 ;; Hugo 用 Org-capture テンプレートの追加
 ;;──────────────────────────────────────────────
 
 (require 'ox-hugo)
+(setq org-export-with-tags t)  ;; タグをエクスポート時に含める
+(setq org-hugo-front-matter-format 'yaml)
+
 
 (defconst my/hugo-blog-dir
   (expand-file-name "~/devs/tsono-blog/content/posts/")
   "Hugo サイトの content/posts/ ディレクトリへの絶対パス（末尾にスラッシュ付き）")
 
 (defun my-org-hugo-new-post ()
-  "Create a new Hugo post directory and open an org file inside it."
+  "Create a new Hugo post using ox-hugo in YYYY/MM/slug/index.org format."
   (let* ((title (read-string "Post title: "))
-         (date (format-time-string "%Y%m%d"))
-         (datetime (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (default-slug (replace-regexp-in-string
+                        "_+" "_"
+                        (replace-regexp-in-string "[^[:word:][:digit:]]" "_" (downcase title))))
+         (slug-input (read-string (format "Slug (default: %s): " default-slug) nil nil default-slug))
          (slug (replace-regexp-in-string
                 "_+" "_"
-                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" title)))
-         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s_%s" date slug)))
+                (replace-regexp-in-string "[^[:word:][:digit:]]" "_" slug-input)))
+         (date (format-time-string "%Y-%m-%dT%H:%M:%S%z"))
+         (year (format-time-string "%Y"))
+         (month (format-time-string "%m"))
+         (bundle-path (format "%s/%s/%s" year month slug))  ; YYYY/MM/slug
+         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s" bundle-path)))
          (file (expand-file-name "index.org" dir)))
     (make-directory dir t)
     (unless (file-exists-p file)
       (with-temp-buffer
         (insert (format "#+TITLE: %s\n" title))
-        (insert (format "#+DATE: %s\n" datetime))
+        (insert "#+IMAGE:\n")
+        (insert (format "#+DATE: %s\n" date))
         (insert "#+HUGO_AUTO_SET_LASTMOD: t\n")
         (insert "#+DESCRIPTION:\n")
-        (insert "#+TAGS:\n")
-        (insert "#+CATEGORIES:\n")
+        (insert "#+HUGO_TAGS:\n")
+        (insert "#+HUGO_CATEGORIES:\n")
         (insert "#+DRAFT: false\n")
+        (insert "#+mermaid: false\n")
+        (insert (format "#+HUGO_BUNDLE: %s\n" bundle-path))
+        (insert "#+EXPORT_FILE_NAME: index\n")
         (write-file file)))
     (find-file file)
     (goto-char (point-max))))
+
+
+
+(use-package org-download
+  :after org
+  :config
+  ;; 画像は現在開いている org ファイルと同じディレクトリに保存
+  (setq org-download-method 'directory)
+  (setq org-download-image-dir "./") ; 現在のorgファイルと同じ場所
+  (setq org-download-screenshot-method "screencapture -i %s") ;; macOSの場合
+
+  ;; ドラッグ＆ドロップされた画像はファイルとして保存される
+  (add-hook 'dired-mode-hook 'org-download-enable)
+  (add-hook 'org-mode-hook 'org-download-enable))
+(setq org-startup-with-inline-images nil)
+  (setq org-image-actual-width '(600)) ;; インラインされる画像の幅を600pxに設定
+
+  ;; Org-modeで画像を挿入するためのキーバインド 後でちゃんと設定する
+  ;; (define-key org-mode-map (kbd "C-c C-x i") 'org-download-clipboard)
+  ;; (define-key org-mode-map (kbd "C-c C-x s") 'org-download-screenshot))
+
+;; <img + TAB> で画像挿入のテンプレートを追加
+(add-to-list 'org-structure-template-alist
+             '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))
+
+(with-eval-after-load 'ox-hugo
+  (require 'cl-lib)
+
+  ;; 値から生URLだけを取り出す: <https://…> / https://… / ![](https://…)
+  (defun my/ox-hugo--extract-url (s)
+    (cond
+     ((string-match "!\\[[^]]*\\](\\(https?://[^)[:space:]]+\\))" s)
+      (match-string 1 s))
+     ((string-match "<\\(https?://[^>[:space:]]+\\)>" s)
+      (match-string 1 s))
+     ((string-match "\\(https?://[^[:space:]]+\\)" s)
+      (match-string 1 s))
+     (t nil)))
+
+  ;; タイトル/説明用の値を整形: 前後空白/引用符/<>を剥がし、" は &quot; に
+  (defun my/ox-hugo--extract-text (s)
+    (let ((txt (string-trim s)))
+      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (when (string-match "\\`<\\(.*\\)>\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (setq txt (replace-regexp-in-string "\"" "&quot;" txt))
+      txt))
+
+  (defun my/ox-hugo-linkcard-paragraph-filter (text backend info)
+    "段落を Hugo の linkcard に変換する。
+- 段落が key=value 行のみで、url= がある → {{< linkcard url=… [image=…] [title=…] [description=…] >}}
+- 単独URL段落                   → {{< linkcard \"…\" >}}"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim  (string-trim text))
+             (lines (split-string trim "\n+" t))
+             url image title description)
+
+        ;; key=value を抽出（前後空白OK）
+        (dolist (l lines)
+          (cond
+           ((string-match "\\`url\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq url (my/ox-hugo--extract-url (match-string 1 l))))
+           ((string-match "\\`image\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq image (my/ox-hugo--extract-url (match-string 1 l))))
+           ((string-match "\\`title\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq title (my/ox-hugo--extract-text (match-string 1 l))))
+           ((string-match "\\`description\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+            (setq description (my/ox-hugo--extract-text (match-string 1 l))))))
+
+        (cond
+         ;; 1) key=value だけで構成 & url がある → 名前付き引数版
+         ((and url
+               (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines))
+          (concat "{{< linkcard"
+                  (format " url=\"%s\"" url)
+                  (when image (format " image=\"%s\"" image))
+                  (when title (format " title=\"%s\"" title))
+                  (when description (format " description=\"%s\"" description))
+                  " >}}\n"))
+
+         ;; 2) 単独URL段落（<…> / 裸URL） → 位置引数版
+         ((or (string-match "\\`<https?://[^>[:space:]]+>\\'" trim)
+              (string-match "\\`https?://[^[:space:]]+\\'" trim))
+          (let ((u (my/ox-hugo--extract-url trim)))
+            (if u (format "{{< linkcard \"%s\" >}}\n" u) text)))
+
+         ;; 3) それ以外はそのまま
+         (t text)))))
+
+  ;; フック登録
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-linkcard-paragraph-filter))
+
+
+;; ------------------------------
+;; figure: key=value 段落から Hugo の figure を生成（新規追加）
+;; ------------------------------
+(with-eval-after-load 'ox-hugo
+  (require 'cl-lib)
+
+  ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
+  (defun my/ox-hugo--extract-src (s)
+    (let ((txt (string-trim s)))
+      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (when (string-match "\\`<\\(.*\\)>\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (cond
+       ;; [[file:/path/to/image.jpg]]
+       ((string-match "\\[\\[file:\\([^]]+\\)\\]\\]" txt)
+        (match-string 1 txt))
+       ;; http/https
+       ((string-match "\\`https?://[^[:space:]]+\\'" txt)
+        txt)
+       ;; それ以外はパスとして返す
+       (t txt))))
+
+  (defun my/ox-hugo--quote (s)
+    "Hugo shortcode 用に値を \"…\" で括り、内部の \" を &quot; に。"
+    (format "\"%s\"" (replace-regexp-in-string "\"" "&quot;" s)))
+
+  (defun my/ox-hugo-figure-paragraph-filter (text backend info)
+    "段落が key=value 行のみで src= が含まれる場合、
+{{< figure src=... [caption=...] [title=...] [alt=...] [width=...] >}} に変換。
+単独の [[file:...]] 段落は手を加えず ox-hugo の既定動作に委ねる。"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim (string-trim text))
+             (lines (split-string trim "\n+" t)))
+        (cond
+         ;; 1) 単独の [[file:...]] だけ → 既定の変換に任せる
+         ((string-match "\\`\\[\\[file:[^]]+\\]\\]\\'" trim)
+          text)
+
+         ;; 2) key=value のみで構成 & src= を含む → figure 生成
+         ((and (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines)
+               (cl-some (lambda (l)
+                          (string-match-p "\\`src\\s-*=" l))
+                        lines))
+          (let (src caption title alt width)
+            ;; 値を収集（caption/title/alt/width は引用符付きでもOK）
+            (dolist (l lines)
+              (cond
+               ((string-match "\\`src\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq src (my/ox-hugo--extract-src (match-string 1 l))))
+               ((string-match "\\`caption\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq caption (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`title\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq title (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`alt\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq alt (my/ox-hugo--extract-text (match-string 1 l))))
+               ((string-match "\\`width\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq width (my/ox-hugo--extract-text (match-string 1 l))))))
+
+            (when src
+              ;; 先頭スラッシュ補正（相対パスを /path にしたい場合）
+              (when (and (not (string-match-p "\\`https?://" src))
+                         (not (string-prefix-p "/" src)))
+                (setq src (concat "/" src)))
+              (concat "{{< figure"
+                      (format " src=%s" (my/ox-hugo--quote src))
+                      (when caption (format " caption=%s" (my/ox-hugo--quote caption)))
+                      (when title   (format " title=%s"   (my/ox-hugo--quote title)))
+                      (when alt     (format " alt=%s"     (my/ox-hugo--quote alt)))
+                      (when width   (format " width=%s"   (my/ox-hugo--quote width)))
+                      " >}}\n"))))
+
+         ;; 3) それ以外はそのまま
+         (t text)))))
+
+  ;; Hook 追加（この add-hook が linkcard より後に評価される想定。
+  ;; デフォルトで先頭に追加されるため、実行順は figure → linkcard）
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-figure-paragraph-filter))
+
+(with-eval-after-load 'ox-hugo
+  (defun my/ox-hugo-video-paragraph-filter (text backend info)
+    "段落が key=value 行のみで video= が含まれる場合、{{< video src=... [width=...] >}} に変換。"
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let* ((trim  (string-trim text))
+             (lines (split-string trim "\n+" t)))
+        (cond
+         ((and (cl-every (lambda (l)
+                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
+                         lines)
+               (cl-some (lambda (l)
+                          (string-match-p "\\`video\\s-*=" l))
+                        lines))
+          (let (video width)
+            (dolist (l lines)
+              (cond
+               ((string-match "\\`video\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq video (my/ox-hugo--extract-src (match-string 1 l))))
+               ((string-match "\\`width\\s-*=[[:space:]]*\\(.+\\)\\'" l)
+                (setq width (my/ox-hugo--extract-text (match-string 1 l))))))
+            (when video
+              (concat "{{< video"
+                      (format " src=%s" (my/ox-hugo--quote video))
+                      (when width (format " width=%s" (my/ox-hugo--quote width)))
+                      " >}}\n"))))
+         (t text)))))
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-video-paragraph-filter))
+
+
+
+(with-eval-after-load 'ox-hugo
+  ;; mermaid ソースブロックを Markdown の ```mermaid フェンスコードに変換
+  (defun my/ox-hugo-src-block-filter (text backend info)
+    "Convert #+begin_src mermaid ... #+end_src into ```mermaid fenced code."
+    (when (org-export-derived-backend-p backend 'hugo)
+      (let ((trim (string-trim text)))
+        ;; Org の src block はすでに text に code 部分だけが入っている
+        (when (string= (org-element-property :language (car (org-export-get-parent-element info))) "mermaid")
+          (concat "```mermaid\n" trim "\n```")))))
+
+  (add-hook 'org-export-filter-src-block-functions
+            #'my/ox-hugo-src-block-filter))
+
+;; エクスポート時にソースコードを実行しない
+(setq org-export-use-babel nil)
+
+;; ox-hugo で export する直前に、#+mermaid: を HUGO front matter に昇格
+(with-eval-after-load 'ox-hugo
+  (defun my/ox-hugo-promote-mermaid (backend)
+    "Promote `#+mermaid: true/false` to Hugo front matter via
+`#+HUGO_CUSTOM_FRONT_MATTER: :mermaid true/false` on ox-hugo export."
+    (when (org-export-derived-backend-p backend 'hugo)
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^#\\+mermaid:\\s-*\\(.*\\)$" nil t)
+          (let* ((raw (downcase (string-trim (match-string 1))))
+                 (bool (member raw '("t" "true" "yes" "on" "1")))
+                 (newline (concat "#+HUGO_CUSTOM_FRONT_MATTER: :mermaid "
+                                  (if bool "true" "false") "\n")))
+            ;; 元の #+mermaid: 行は削除
+            (beginning-of-line)
+            (kill-whole-line)
+            ;; 挿入位置：既存のヘッダ行群の直後（TITLE/DATE/HUGO_* 等の後）
+            (goto-char (point-min))
+            (while (looking-at "^#\\+\\(TITLE\\|AUTHOR\\|DATE\\|LASTMOD\\|DESCRIPTION\\|TAGS\\|CATEGORIES\\|DRAFT\\|HUGO_.*\\|EXPORT_FILE_NAME\\|IMAGE\\)\\b")
+              (forward-line 1))
+            (insert newline))))))
+
+  (add-hook 'org-export-before-processing-hook #'my/ox-hugo-promote-mermaid))
