@@ -75,9 +75,6 @@
   "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
   (my/os-value windows-path non-windows-path))
 
-;; `org` パッケージを明示的にインストール
-(package-install 'org)
-
 ;; ---------------------------------------------
 ;; gnuplot の読み込み
 ;; ---------------------------------------------

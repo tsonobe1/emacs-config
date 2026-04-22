@@ -152,6 +152,8 @@
                    ("gnu" . "https://elpa.gnu.org/packages/"))))
   (should (eq package-enable-at-startup nil))
   (should (eq use-package-always-ensure t))
+  (should (equal package-selected-packages
+                 '(org doom-modeline doom-themes listen)))
   (should (equal my-required-packages
                  '(vertico marginalia orderless consult embark embark-consult
                            savehist compat))))
