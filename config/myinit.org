@@ -870,10 +870,6 @@
     (completion-styles '(orderless basic))
     (completion-category-overrides '((file (styles basic partial-completion)))))
 
-  (require 'orderless)
-  (setq completion-styles '(orderless basic)
-        completion-category-overrides '((file (styles basic partial-completion))))
-
 #+END_SRC
 
 #+begin_src emacs-lisp
