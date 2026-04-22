@@ -449,7 +449,6 @@
     "現在のエントリに 'node-link' プロパティを追加する（複数登録可）。
     org-roam のノード補完を使ってリンクを選ぶ。"
     (interactive)
-    (require 'org-roam)
     (let* ((node (org-roam-node-read))
 	   (id (org-roam-node-id node))
 	   (title (org-roam-node-title node))

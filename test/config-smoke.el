@@ -71,6 +71,11 @@
   (should (eq (lookup-key global-map (kbd "C-c n u")) 'org-roam-ui-mode))
   (should (eq (lookup-key global-map (kbd "<f8>")) 'neotree-toggle)))
 
+(ert-deftest config-smoke/orgローカルキーバインドが維持される ()
+  (should (eq (lookup-key org-mode-map (kbd "C-c C-x n")) 'my/org-add-node-link-property))
+  (should (eq (lookup-key org-mode-map (kbd "C-c C-p")) 'org-calc-progress))
+  (should (eq (lookup-key org-mode-map (kbd "C-c C-n h")) 'org-hugo-export-to-md)))
+
 (ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()
   (should-not (bound-and-true-p amx-mode)))
 
