@@ -235,22 +235,18 @@
 ;; エラーがあればミニバッファに表示（エラーリストバッファが開いていない時）
 (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
 
-(if (eq system-type 'windows-nt)
-    ;; Windowsの場合
-    (progn
-	;; exec-path に Node.js のパスを追加
-	(setq exec-path (append '("C:/scoop/apps/nodejs16/current" "C:/scoop/apps/nodejs16/current/bin") exec-path))
+(let ((node-exec-paths
+	 (if (eq system-type 'windows-nt)
+	     '("C:/scoop/apps/nodejs16/current" "C:/scoop/apps/nodejs16/current/bin")
+	   '("/Users/tsonobe/.nodebrew/current/bin/node")))
+	(node-path-prefix
+	 (my/os-path "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
+		     "/Users/tsonobe/.nodebrew/current/bin/node")))
+  ;; exec-path に Node.js のパスを追加
+  (setq exec-path (append node-exec-paths exec-path))
 
-	;; 環境変数 PATH にも追加
-	(setenv "PATH" (concat "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;" (getenv "PATH"))))
-
-  ;; macOSの場合
-  (progn
-    ;; exec-path に Node.js のパスを追加（Homebrewでインストールした場合の例）
-    (setq exec-path (append '("/Users/tsonobe/.nodebrew/current/bin/node") exec-path))
-
-    ;; 環境変数 PATH にも追加
-    (setenv "PATH" (concat "/Users/tsonobe/.nodebrew/current/bin/node" (getenv "PATH")))))
+  ;; 環境変数 PATH にも追加
+  (setenv "PATH" (concat node-path-prefix (getenv "PATH"))))
 
 (setq org-todo-keywords
 	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))

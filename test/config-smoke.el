@@ -15,6 +15,8 @@
 
 (defconst config-test--windows-path-pairs
   '(("C:/emacs-org/env/bin/python" "/Users/tsonobe/.emacs.d/env/bin/python")
+    ("C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
+     "/Users/tsonobe/.nodebrew/current/bin/node")
     ("C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
      "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")
     ("C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
@@ -29,6 +31,8 @@
 
 (defconst config-test--windows-source-paths
   '("C:/emacs-org/env/bin/python"
+    "C:/scoop/apps/nodejs16/current"
+    "C:/scoop/apps/nodejs16/current/bin"
     "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
     "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
     "C:/emacs-org/.textlintrc.json"
@@ -90,6 +94,11 @@
   (should (equal ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
   (should (equal flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint"))
   (should (equal flycheck-textlint-config "~/.emacs.d/.textlintrc.json")))
+
+(ert-deftest config-smoke/macos用のnode設定が維持される ()
+  (should (equal (car exec-path) "/Users/tsonobe/.nodebrew/current/bin/node"))
+  (should (string-prefix-p "/Users/tsonobe/.nodebrew/current/bin/node"
+                           (getenv "PATH"))))
 
 (ert-deftest config-smoke/Windowsでは主要パスがWindows側の文字列になる ()
   (let ((system-type 'windows-nt))
