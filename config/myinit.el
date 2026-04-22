@@ -106,7 +106,8 @@
 (setq package-enable-at-startup nil)
 
 ;; org-tempo を読み込むことで、<s TAB などのテンプレ展開が有効になる
-(require 'org-tempo)
+(my/after-org-load
+  (require 'org-tempo))
 
 ;; Babelの設定
 ;; Python 実行コマンドのパスを OS によって切り替える

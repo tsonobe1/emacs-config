@@ -170,6 +170,10 @@
   (should (equal (assoc "img" org-structure-template-alist)
                  '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))))
 
+(ert-deftest config-smoke/orgテンプレートの標準略記が維持される ()
+  (should (equal (assoc "s" org-structure-template-alist)
+                 '("s" . "src"))))
+
 (ert-deftest config-smoke/oxhugo関連の既定値が維持される ()
   (should (featurep 'ox-hugo))
   (should org-export-with-tags)
