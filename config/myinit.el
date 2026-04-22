@@ -940,6 +940,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   `(with-eval-after-load 'ox-hugo
      ,@body))
 
+(require 'cl-lib)
+
 ;; Org-roamノードを ox-hugo でエクスポートするショートカット
 (my/after-org-load
   (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
@@ -1011,8 +1013,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title ")))
 
 (my/after-ox-hugo-load
-  (require 'cl-lib)
-
   ;; 値から生URLだけを取り出す: <https://…> / https://… / ![](https://…)
   (defun my/ox-hugo--extract-url (s)
     (cond
