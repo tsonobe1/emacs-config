@@ -160,6 +160,10 @@
   (should (equal completion-category-overrides
                  '((file (styles basic partial-completion))))))
 
+(ert-deftest config-smoke/consultとembarkの連携拡張が読み込まれる ()
+  (should (featurep 'embark-consult))
+  (should (bound-and-true-p config-test--embark-consult-loaded)))
+
 (ert-deftest config-smoke/org画像関連の既定値が維持される ()
   (should-not org-startup-with-inline-images)
   (should (equal org-image-actual-width '(600)))

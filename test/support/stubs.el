@@ -124,7 +124,6 @@
                    doom-modeline
                    doom-themes
                    embark
-                   embark-consult
                    flycheck
                    gnuplot
                    marginalia

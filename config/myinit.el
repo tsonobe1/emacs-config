@@ -787,10 +787,16 @@ If PREFIX is empty, show a message and do nothing."
   ;; package.
   (marginalia-mode))
 
+(defmacro my/after-consult-and-embark-load (&rest body)
+  "Evaluate BODY after consult and embark have loaded."
+  (declare (indent defun))
+  `(with-eval-after-load 'consult
+     (with-eval-after-load 'embark
+       ,@body)))
+
 ;; embark-consultを読み込む
-(with-eval-after-load 'consult
-  (with-eval-after-load 'embark
-    (require 'embark-consult)))
+(my/after-consult-and-embark-load
+  (require 'embark-consult))
 
 ;; orderlessの設定
 (use-package orderless
