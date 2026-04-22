@@ -692,9 +692,6 @@ If PREFIX is empty, show a message and do nothing."
 	   (dolist (file ng-files-list)
 	     (message "%s" file)))))
 
-;; 関数をインタラクティブにするための設定
-(provide 'check-org-properties-block-recursively)
-
 ;; neotreeのインストールと設定
 (use-package neotree
   :ensure t

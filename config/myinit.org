@@ -741,9 +741,6 @@
 	   (message "NG files list:")
 	   (dolist (file ng-files-list)
 	     (message "%s" file)))))
-
-     ;; 関数をインタラクティブにするための設定
-     (provide 'check-org-properties-block-recursively)
   #+END_SRC
 ** neotree
 ** keybinding
