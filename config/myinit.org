@@ -1037,10 +1037,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 (setq org-hugo-front-matter-format 'yaml)
 
 
-(defconst my/hugo-blog-dir
-  (expand-file-name "~/devs/tsono-blog/content/posts/")
-  "Hugo サイトの content/posts/ ディレクトリへの絶対パス（末尾にスラッシュ付き）")
-
 (defun my-org-hugo-new-post ()
   "Create a new Hugo post using ox-hugo in YYYY/MM/slug/index.org format."
   (let* ((title (read-string "Post title: "))
