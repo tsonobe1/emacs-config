@@ -758,10 +758,6 @@ If PREFIX is empty, show a message and do nothing."
 (my/ensure-packages-installed my-required-packages)
 (require 'compat)
 
-;; 補完スタイルにorderlessを利用する
-(with-eval-after-load 'orderless
-  (setq completion-styles '(orderless)))
-
 ;; 補完候補を最大20行まで表示する
 (setq vertico-count 20)
 
