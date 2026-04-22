@@ -487,15 +487,13 @@
 
 
   ;; ------------------------------------------------------------
-  ;; Effort プロパティで選べる時間を制限する
+  ;; Effort 関連の設定
   ;; ------------------------------------------------------------
   (my/after-org-load
     ;; Effort_ALL に列挙した値だけを C-c C-x e 時に補完
     (setq org-global-properties
-	  '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00"))))
+	  '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00")))
 
-
-  (my/after-org-load
     ;; 時間文字列→分 に変換するために必要
     (require 'org-duration)
 
@@ -512,10 +510,8 @@
 	   min))))
 
     ;; org-set-effort 実行後にチェック
-    (advice-add 'org-set-effort :after #'my/org-check-effort-breakdown))
+    (advice-add 'org-set-effort :after #'my/org-check-effort-breakdown)
 
-
-  (my/after-org-load
     (defcustom my/org-effort-diff-threshold 10
       "Effort と CLOCK 合計の差がこれ（分）を超えたときに理由を聞く。"
       :type 'integer)

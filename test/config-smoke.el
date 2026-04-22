@@ -97,6 +97,14 @@
   (should (eq org-log-done 'time))
   (should (equal org-agenda-files '("~/.emacs.d/inbox.org"))))
 
+(ert-deftest config-smoke/effort関連の設定と監視が維持される ()
+  (should (equal org-global-properties
+                 '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00"))))
+  (should (featurep 'org-duration))
+  (should (advice-member-p #'my/org-check-effort-breakdown #'org-set-effort))
+  (should (config-test--hook-contains-p 'org-after-todo-state-change-hook
+                                        'my/org-check-effort-diff)))
+
 (ert-deftest config-smoke/orgcaptureの保存先が維持される ()
   (should (equal (nth 3 (assoc "t" org-capture-templates))
                  '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
