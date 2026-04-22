@@ -939,6 +939,12 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   ;; 開いている org ファイルのディレクトリにエクスポートする（ページバンドル対応）
   (setq org-hugo-auto-set-export-dir t))
 
+(defmacro my/after-ox-hugo-load (&rest body)
+  "Evaluate BODY after ox-hugo has loaded."
+  (declare (indent defun))
+  `(with-eval-after-load 'ox-hugo
+     ,@body))
+
 ;; Org-roamノードを ox-hugo でエクスポートするショートカット
 (my/after-org-load
   (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
@@ -1010,7 +1016,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 (add-to-list 'org-structure-template-alist
              '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))
 
-(with-eval-after-load 'ox-hugo
+(my/after-ox-hugo-load
   (require 'cl-lib)
 
   ;; 値から生URLだけを取り出す: <https://…> / https://… / ![](https://…)
@@ -1085,7 +1091,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 ;; ------------------------------
 ;; figure: key=value 段落から Hugo の figure を生成（新規追加）
 ;; ------------------------------
-(with-eval-after-load 'ox-hugo
+(my/after-ox-hugo-load
   ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
   (defun my/ox-hugo--extract-src (s)
     (let ((txt (string-trim s)))
@@ -1162,7 +1168,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   (add-hook 'org-export-filter-paragraph-functions
             #'my/ox-hugo-figure-paragraph-filter))
 
-(with-eval-after-load 'ox-hugo
+(my/after-ox-hugo-load
   (defun my/ox-hugo-video-paragraph-filter (text backend info)
     "段落が key=value 行のみで video= が含まれる場合、{{< video src=... [width=...] >}} に変換。"
     (when (org-export-derived-backend-p backend 'hugo)
@@ -1193,7 +1199,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 
 
 
-(with-eval-after-load 'ox-hugo
+(my/after-ox-hugo-load
   ;; mermaid ソースブロックを Markdown の ```mermaid フェンスコードに変換
   (defun my/ox-hugo-src-block-filter (text backend info)
     "Convert #+begin_src mermaid ... #+end_src into ```mermaid fenced code."
@@ -1210,7 +1216,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 (setq org-export-use-babel nil)
 
 ;; ox-hugo で export する直前に、#+mermaid: を HUGO front matter に昇格
-(with-eval-after-load 'ox-hugo
+(my/after-ox-hugo-load
   (defun my/ox-hugo-promote-mermaid (backend)
     "Promote `#+mermaid: true/false` to Hugo front matter via
 `#+HUGO_CUSTOM_FRONT_MATTER: :mermaid true/false` on ox-hugo export."
