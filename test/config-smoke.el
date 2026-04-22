@@ -150,6 +150,12 @@
   (should (equal completion-category-overrides
                  '((file (styles basic partial-completion))))))
 
+(ert-deftest config-smoke/org画像関連の既定値が維持される ()
+  (should-not org-startup-with-inline-images)
+  (should (equal org-image-actual-width '(600)))
+  (should (equal (assoc "img" org-structure-template-alist)
+                 '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))))
+
 (ert-deftest config-smoke/パッケージ初期化設定の既定値が維持される ()
   (should (equal package-archives
                  '(("melpa" . "https://melpa.org/packages/")

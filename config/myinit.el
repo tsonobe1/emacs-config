@@ -1005,16 +1005,19 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   ;; ドラッグ＆ドロップされた画像はファイルとして保存される
   (add-hook 'dired-mode-hook 'org-download-enable)
   (add-hook 'org-mode-hook 'org-download-enable))
-(setq org-startup-with-inline-images nil)
-  (setq org-image-actual-width '(600)) ;; インラインされる画像の幅を600pxに設定
+
+;; Org の画像表示はデフォルトで展開せず、表示幅だけ統一する
+(setq org-startup-with-inline-images nil
+      org-image-actual-width '(600))
 
   ;; Org-modeで画像を挿入するためのキーバインド 後でちゃんと設定する
   ;; (define-key org-mode-map (kbd "C-c C-x i") 'org-download-clipboard)
   ;; (define-key org-mode-map (kbd "C-c C-x s") 'org-download-screenshot))
 
 ;; <img + TAB> で画像挿入のテンプレートを追加
-(add-to-list 'org-structure-template-alist
-             '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))
+(my/after-org-load
+  (add-to-list 'org-structure-template-alist
+               '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title ")))
 
 (my/after-ox-hugo-load
   (require 'cl-lib)
