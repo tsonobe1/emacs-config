@@ -70,6 +70,9 @@
   (should (eq (lookup-key global-map (kbd "C-c d")) 'my/remove-blank-lines))
   (should (eq (lookup-key global-map (kbd "<f8>")) 'neotree-toggle)))
 
+(ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()
+  (should-not (bound-and-true-p amx-mode)))
+
 (ert-deftest config-smoke/org関連のワークフロー設定が維持される ()
   (should (equal org-todo-keywords
                  '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|"

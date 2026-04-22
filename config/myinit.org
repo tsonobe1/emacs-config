@@ -28,10 +28,6 @@
       :diminish which-key-mode ;; モードライン表示を簡素化
       :hook (after-init . which-key-mode)) ;; Emacs起動後に自動有効化
 
-    ;; -------------------------------------------------------------
-    ;; amx：M-x 実行履歴を強化（smexの後継）
-    ;; -------------------------------------------------------------
-    (use-package amx)
   #+END_SRC
 ** package
   #+BEGIN_SRC emacs-lisp

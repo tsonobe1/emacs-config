@@ -93,7 +93,6 @@
   (defalias fn (lambda (&rest _args) nil)))
 
 (dolist (feature '(all-the-icons
-                   amx
                    compat
                    consult
                    dockerfile-mode
