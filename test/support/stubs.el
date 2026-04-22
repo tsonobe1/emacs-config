@@ -38,7 +38,30 @@
 
   (defun config-test--expand-hook-forms (forms)
     "Convert all :hook FORMS into `add-hook' calls."
-    (cl-mapcan #'config-test--expand-hook-spec forms)))
+    (cl-mapcan #'config-test--expand-hook-spec forms))
+
+  (defun config-test--expand-bind-spec (spec &optional current-map)
+    "Convert a use-package :bind SPEC into key-binding forms."
+    (cond
+     ((and (consp spec) (eq (car spec) :map))
+      (let ((map (cadr spec))
+            (bindings (cddr spec)))
+        (cl-mapcan (lambda (binding)
+                     (config-test--expand-bind-spec binding map))
+                   bindings)))
+     ((and (consp spec) (stringp (car spec)) (symbolp (cdr spec)))
+      (let ((key-form `(kbd ,(car spec)))
+            (command `(function ,(cdr spec))))
+        (if current-map
+            (list `(define-key ,current-map ,key-form ,command))
+          (list `(global-set-key ,key-form ,command)))))
+     ((listp spec)
+      (cl-mapcan #'config-test--expand-bind-spec spec))
+     (t nil)))
+
+  (defun config-test--expand-bind-forms (forms)
+    "Convert all :bind FORMS into key-binding calls."
+    (cl-mapcan #'config-test--expand-bind-spec forms)))
 
 (defmacro use-package (name &rest args)
   "Evaluate the small subset of `use-package' used by this config."
@@ -47,11 +70,13 @@
          (init-forms (alist-get :init sections nil nil #'eq))
          (config-forms (alist-get :config sections nil nil #'eq))
          (custom-forms (alist-get :custom sections nil nil #'eq))
-         (hook-forms (alist-get :hook sections nil nil #'eq)))
+         (hook-forms (alist-get :hook sections nil nil #'eq))
+         (bind-forms (alist-get :bind sections nil nil #'eq)))
     `(progn
        (require ',name nil t)
        ,@(config-test--expand-custom-forms custom-forms)
        ,@(config-test--expand-hook-forms hook-forms)
+       ,@(config-test--expand-bind-forms bind-forms)
        ,@init-forms
        ,@config-forms)))
 

@@ -309,6 +309,11 @@
 		      ("C-c n r" . org-roam-ref-add)))
       (global-set-key (kbd (car key-fn)) (cdr key-fn)))
 
+    (use-package org-roam-ui
+      :after org-roam
+      :commands org-roam-ui-mode
+      :bind ("C-c n u" . org-roam-ui-mode))
+
     ;; 他モードでも補完を有効に（例: org-capture など）
     (setq org-roam-completion-everywhere t)
 
@@ -712,9 +717,6 @@
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
-
-
      (defun check-org-properties-block-recursively ()
        "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
        (interactive)

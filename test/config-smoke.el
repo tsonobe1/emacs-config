@@ -68,6 +68,7 @@
   (should (eq (lookup-key global-map (kbd "C-c c")) 'org-capture))
   (should (eq (lookup-key global-map (kbd "C-c a")) 'org-agenda))
   (should (eq (lookup-key global-map (kbd "C-c d")) 'my/remove-blank-lines))
+  (should (eq (lookup-key global-map (kbd "C-c n u")) 'org-roam-ui-mode))
   (should (eq (lookup-key global-map (kbd "<f8>")) 'neotree-toggle)))
 
 (ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()

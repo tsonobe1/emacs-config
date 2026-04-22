@@ -284,6 +284,11 @@
 		      ("C-c n r" . org-roam-ref-add)))
   (global-set-key (kbd (car key-fn)) (cdr key-fn)))
 
+(use-package org-roam-ui
+  :after org-roam
+  :commands org-roam-ui-mode
+  :bind ("C-c n u" . org-roam-ui-mode))
+
 ;; 他モードでも補完を有効に（例: org-capture など）
 (setq org-roam-completion-everywhere t)
 
@@ -662,13 +667,10 @@ If PREFIX is empty, show a message and do nothing."
 
 (global-set-key (kbd "C-c i") 'my/org-insert-sections)
 
-(global-set-key (kbd "C-c n u") 'org-roam-ui-mode)
-
-
- (defun check-org-properties-block-recursively ()
-   "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
-   (interactive)
-   (let* ((directory (file-name-as-directory org-roam-directory))
+(defun check-org-properties-block-recursively ()
+  "Check if the .org files in the org-roam-directory and its subdirectories contain the required :PROPERTIES: block."
+  (interactive)
+  (let* ((directory (file-name-as-directory org-roam-directory))
 	      (total-files 0)
 	      (ok-files 0)
 	      (ng-files 0)
@@ -693,8 +695,8 @@ If PREFIX is empty, show a message and do nothing."
 	   (dolist (file ng-files-list)
 	     (message "%s" file)))))
 
- ;; 関数をインタラクティブにするための設定
- (provide 'check-org-properties-block-recursively)
+;; 関数をインタラクティブにするための設定
+(provide 'check-org-properties-block-recursively)
 
 ;; neotreeのインストールと設定
 (use-package neotree
