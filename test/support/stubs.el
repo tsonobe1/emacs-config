@@ -87,7 +87,7 @@
   nil)
 
 (defvar flycheck-checkers nil)
-(defvar org-ai-api-key nil)
+(defvar org-ai-api-key "config-test-org-ai-key")
 (defvar neo-buffer-name "*NeoTree*")
 (defvar config-test--org-roam-autosync-enabled nil)
 

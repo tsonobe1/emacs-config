@@ -176,6 +176,10 @@
   (should (config-test--hook-contains-p 'org-mode-hook 'org-ai-mode))
   (should (config-test--hook-contains-p 'org-mode-hook 'org-download-enable)))
 
+(ert-deftest config-smoke/orgaiの認証設定が維持される ()
+  (should (equal org-ai-openai-api-token "config-test-org-ai-key"))
+  (should (equal org-ai-default-chat-model "gpt-4.1-mini")))
+
 (ert-deftest config-smoke/補完設定の既定値が維持される ()
   (should (equal completion-styles '(orderless basic)))
   (should (equal completion-category-overrides

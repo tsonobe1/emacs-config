@@ -797,22 +797,20 @@
     :ensure t
     :commands (org-ai-mode
 	       org-ai-global-mode)
+    :hook (org-mode . org-ai-mode)
     :init
-    ;; Org-mode バッファに入った時、自動で org-ai-mode を有効化
-    (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-
     ;; グローバルに org-ai のキーバインド（C-c M-a）を有効化
     (org-ai-global-mode) ; installs global keybindings on C-c M-a
 
     :config
+    ;; 環境変数からAPIキーを取得する
+    (setq org-ai-openai-api-token org-ai-api-key)
+
     ;; OpenAI モデルを指定
     (setq org-ai-default-chat-model "gpt-4.1-mini") ; if you are on the gpt-4 beta:
 
     ;; yasnippet 用の AI スニペットを読み込む（`ai` という展開補助）
     (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
-
-  ;; 環境変数からAPIキーを取得する
-  (setq org-ai-openai-api-token org-ai-api-key)
 
 
   ;; ----------------------------------------------------------
