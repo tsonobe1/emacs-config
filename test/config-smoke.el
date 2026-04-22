@@ -13,6 +13,32 @@
   "Return non-nil when HOOK contains FUNCTION."
   (member function (symbol-value hook)))
 
+(defconst config-test--windows-path-pairs
+  '(("C:/emacs-org/env/bin/python" "/Users/tsonobe/.emacs.d/env/bin/python")
+    ("C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
+     "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")
+    ("C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
+     "~/.nodebrew/node/v22.3.0/bin/textlint")
+    ("C:/emacs-org/.textlintrc.json" "~/.emacs.d/.textlintrc.json")
+    ("C:/emacs-org/org-roam" "~/.emacs.d/org-roam")
+    ("C:/emacs-org/org-roam/org-roam.db" "~/.emacs.d/org-roam/org-roam.db")
+    ("C:/emacs-org/config/secrets.el" "~/.emacs.d/config/secrets.el")
+    ("C:/emacs-org/inbox.org" "~/.emacs.d/inbox.org")
+    ("C:\\emacs-org\\inbox.org" "~/.emacs.d/inbox.org"))
+  "Windows/non-Windows path pairs used by the shared config.")
+
+(defconst config-test--windows-source-paths
+  '("C:/emacs-org/env/bin/python"
+    "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
+    "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
+    "C:/emacs-org/.textlintrc.json"
+    "C:/emacs-org/org-roam"
+    "C:/emacs-org/org-roam/org-roam.db"
+    "C:/emacs-org/config/secrets.el"
+    "C:/emacs-org/inbox.org"
+    "C:\\\\emacs-org\\\\inbox.org")
+  "Windows path literals that should remain in `config/myinit.org`.")
+
 (ert-deftest config-smoke/Emacsを起動するとorgソースを読む ()
   (with-temp-buffer
     (insert-file-contents (config-test-path "init.el"))
@@ -47,11 +73,47 @@
   (should (eq org-log-done 'time))
   (should (equal org-agenda-files '("~/.emacs.d/inbox.org"))))
 
+(ert-deftest config-smoke/orgcaptureの保存先が維持される ()
+  (should (equal (nth 3 (assoc "t" org-capture-templates))
+                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+  (should (equal (nth 3 (assoc "w" org-capture-templates))
+                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+  (should (equal (nth 3 (assoc "p" org-capture-templates))
+                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+  (should (equal (nth 3 (assoc "s" org-capture-templates))
+                 '(file+headline "~/.emacs.d/inbox.org" "🤔 Someday"))))
+
 (ert-deftest config-smoke/macos用のパス設定が維持される ()
   (should (equal org-roam-directory (file-truename "~/.emacs.d/org-roam")))
   (should (equal org-roam-db-location "~/.emacs.d/org-roam/org-roam.db"))
   (should (equal org-babel-python-command "/Users/tsonobe/.emacs.d/env/bin/python"))
+  (should (equal ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
+  (should (equal flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint"))
   (should (equal flycheck-textlint-config "~/.emacs.d/.textlintrc.json")))
+
+(ert-deftest config-smoke/Windowsでは主要パスがWindows側の文字列になる ()
+  (let ((system-type 'windows-nt))
+    (dolist (path-pair config-test--windows-path-pairs)
+      (pcase-let ((`(,windows-path ,non-windows-path) path-pair))
+        (should (equal (my/os-path windows-path non-windows-path)
+                       windows-path))))))
+
+(ert-deftest config-smoke/Windows向けのorg保存先文字列が維持される ()
+  (let* ((system-type 'windows-nt)
+         (inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
+                                 "~/.emacs.d/inbox.org")))
+    (should (equal `(file+headline ,inbox-file "📥 INBOX")
+                   '(file+headline "C:\\emacs-org\\inbox.org" "📥 INBOX")))
+    (should (equal `(file+headline ,inbox-file "🤔 Someday")
+                   '(file+headline "C:\\emacs-org\\inbox.org" "🤔 Someday")))
+    (should (equal (list (my/os-path "C:/emacs-org/inbox.org"
+                                     "~/.emacs.d/inbox.org"))
+                   '("C:/emacs-org/inbox.org")))))
+
+(ert-deftest config-smoke/Windows向けの主要パス分岐が設定ソースに残っている ()
+  (let ((source (config-test-file-contents (config-test-path "config" "myinit.org"))))
+    (dolist (windows-path config-test--windows-source-paths)
+      (should (string-match-p (regexp-quote windows-path) source)))))
 
 (ert-deftest config-smoke/主要なフック登録が維持される ()
   (should (config-test--hook-contains-p 'gfm-mode-hook 'flycheck-mode))
