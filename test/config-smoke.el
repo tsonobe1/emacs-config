@@ -81,6 +81,12 @@
   (should (eq (lookup-key org-agenda-mode-map (kbd "i")) 'org-agenda-clock-in))
   (should (eq (lookup-key org-agenda-mode-map (kbd "o")) 'org-agenda-clock-out)))
 
+(ert-deftest config-smoke/orgagendaの現在行強調設定が維持される ()
+  (require 'org-agenda)
+  (should (config-test--hook-contains-p 'org-agenda-mode-hook
+                                        'my/org-agenda-enable-current-line-highlight))
+  (should (eq hl-line-face 'underline)))
+
 (ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()
   (should-not (bound-and-true-p amx-mode)))
 
@@ -149,6 +155,7 @@
       (should (string-match-p (regexp-quote windows-path) source)))))
 
 (ert-deftest config-smoke/主要なフック登録が維持される ()
+  (should (config-test--hook-contains-p 'dired-mode-hook 'org-download-enable))
   (should (config-test--hook-contains-p 'gfm-mode-hook 'flycheck-mode))
   (should (config-test--hook-contains-p 'markdown-mode-hook 'flycheck-mode))
   (should (config-test--hook-contains-p 'org-mode-hook 'flycheck-mode))
@@ -173,6 +180,10 @@
 (ert-deftest config-smoke/orgテンプレートの標準略記が維持される ()
   (should (equal (assoc "s" org-structure-template-alist)
                  '("s" . "src"))))
+
+(ert-deftest config-smoke/orgテンプレートの追加略記が維持される ()
+  (should (equal (assoc "ai" org-structure-template-alist)
+                 '("ai" . "ai"))))
 
 (ert-deftest config-smoke/oxhugo関連の既定値が維持される ()
   (should (featurep 'ox-hugo))

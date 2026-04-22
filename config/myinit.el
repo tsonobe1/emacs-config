@@ -88,6 +88,11 @@
   `(with-eval-after-load 'org
      ,@body))
 
+(defun my/add-org-structure-template (shortcut template)
+  "Add an Org structure TEMPLATE mapped by SHORTCUT."
+  (add-to-list 'org-structure-template-alist
+               (cons shortcut template)))
+
 ;; ---------------------------------------------
 ;; gnuplot の読み込み
 ;; ---------------------------------------------
@@ -352,16 +357,18 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
-(let ((inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
-				"~/.emacs.d/inbox.org")))
+(let* ((inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
+				 "~/.emacs.d/inbox.org"))
+       (inbox-target `(file+headline ,inbox-file "📥 INBOX"))
+       (someday-target `(file+headline ,inbox-file "🤔 Someday")))
   (setq org-capture-templates
-	  `(("t" "Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	  `(("t" "Todo" entry ,inbox-target
 	     "** TODO %?")
-	    ("w" "Work Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	    ("w" "Work Todo" entry ,inbox-target
 	     "** TODO %?  :work:")
-	    ("p" "Private Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	    ("p" "Private Todo" entry ,inbox-target
 	     "** TODO %?  :private:")
-	    ("s" "Someday" entry (file+headline ,inbox-file "🤔 Someday")
+	    ("s" "Someday" entry ,someday-target
 	     "** SAMEDAY %?")
 	    ("h" "Hugo blog post" plain
 	     (function my-org-hugo-new-post)
@@ -385,8 +392,12 @@
 ;; Org Agenda の表示に関する UI 設定
 ;; ---------------------------------------------------------
 
+(defun my/org-agenda-enable-current-line-highlight ()
+  "Highlight the current line in Org Agenda buffers."
+  (hl-line-mode 1))
+
 ;; agenda バッファで現在行を強調表示（行のハイライト）
-(add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)))
+(add-hook 'org-agenda-mode-hook #'my/org-agenda-enable-current-line-highlight)
 
 ;; ハイライトスタイルを下線に
 (setq hl-line-face 'underline)
@@ -751,9 +762,8 @@ If PREFIX is empty, show a message and do nothing."
 ;; Org-mode の <ai + TAB に対応する構文テンプレートを追加
 ;; ----------------------------------------------------------
 (my/after-org-load
-  (add-to-list 'org-structure-template-alist
-		 ;; <ai + tab --> #+begin_ai
-		 '("ai" . "ai")))
+  ;; <ai + tab --> #+begin_ai
+  (my/add-org-structure-template "ai" "ai"))
 
 ;; Vertico 系パッケージは MELPA を優先して解決する
 (my/set-package-archives my/melpa-priority-package-archives)
@@ -999,15 +1009,13 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 
 (use-package org-download
   :after org
+  :hook ((dired-mode . org-download-enable)
+         (org-mode . org-download-enable))
   :config
   ;; 画像は現在開いている org ファイルと同じディレクトリに保存
   (setq org-download-method 'directory)
   (setq org-download-image-dir "./") ; 現在のorgファイルと同じ場所
-  (setq org-download-screenshot-method "screencapture -i %s") ;; macOSの場合
-
-  ;; ドラッグ＆ドロップされた画像はファイルとして保存される
-  (add-hook 'dired-mode-hook 'org-download-enable)
-  (add-hook 'org-mode-hook 'org-download-enable))
+  (setq org-download-screenshot-method "screencapture -i %s")) ;; macOSの場合
 
 ;; Org の画像表示はデフォルトで展開せず、表示幅だけ統一する
 (setq org-startup-with-inline-images nil
@@ -1019,8 +1027,9 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 
 ;; <img + TAB> で画像挿入のテンプレートを追加
 (my/after-org-load
-  (add-to-list 'org-structure-template-alist
-               '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title ")))
+  (my/add-org-structure-template
+   "img"
+   "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))
 
 (my/after-ox-hugo-load
   ;; 値から生URLだけを取り出す: <https://…> / https://… / ![](https://…)
