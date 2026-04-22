@@ -282,46 +282,37 @@
     ;; org-roam の導入と初期設定
     ;; -------------------------------------------------------------
 
-    ;; org-roam がインストールされていない場合はインストールする
-    (my/ensure-packages-installed '(org-roam))
+    (use-package org-roam
+      :ensure t
+      :bind (("C-c n f" . org-roam-node-find)
+	     ("C-c n i" . org-roam-node-insert)
+	     ("C-c n t" . org-roam-buffer-toggle)
+	     ("C-c n l" . org-roam-buffer-toggle)
+	     ("C-c n d" . org-roam-dailies-capture-date)
+	     ("C-c n g" . org-roam-graph)
+	     ("C-c n a" . org-roam-alias-add)
+	     ("C-c n r" . org-roam-ref-add))
+      :config
+      ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
+      (setq org-roam-directory
+	    (file-truename (my/os-path "C:/emacs-org/org-roam"
+				       "~/.emacs.d/org-roam")))
 
-    ;; org-roam を読み込む
-    (require 'org-roam)
+      ;; データベースファイルの保存先を指定
+      (setq org-roam-db-location
+	    (my/os-path "C:/emacs-org/org-roam/org-roam.db"
+			"~/.emacs.d/org-roam/org-roam.db"))
 
-    ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
-    (setq org-roam-directory
-	  (file-truename (my/os-path "C:/emacs-org/org-roam"
-				     "~/.emacs.d/org-roam")))
+      ;; 他モードでも補完を有効に（例: org-capture など）
+      (setq org-roam-completion-everywhere t)
 
-    ;; データベースファイルの保存先を指定
-    (setq org-roam-db-location
-	  (my/os-path "C:/emacs-org/org-roam/org-roam.db"
-		      "~/.emacs.d/org-roam/org-roam.db"))
-
-    ;; org-roam のデータベース同期を自動で行う
-    (org-roam-db-autosync-mode)
-
-
-    ;; -------------------------------------------------------------
-    ;; org-roam のキーバインド（主に C-c n で始まる）
-    ;; -------------------------------------------------------------
-    (dolist (key-fn '(("C-c n f" . org-roam-node-find)
-		      ("C-c n i" . org-roam-node-insert)
-		      ("C-c n t" . org-roam-buffer-toggle)
-		      ("C-c n l" . org-roam-buffer-toggle)
-		      ("C-c n d" . org-roam-dailies-capture-date)
-		      ("C-c n g" . org-roam-graph)
-		      ("C-c n a" . org-roam-alias-add)
-		      ("C-c n r" . org-roam-ref-add)))
-      (global-set-key (kbd (car key-fn)) (cdr key-fn)))
+      ;; org-roam のデータベース同期を自動で行う
+      (org-roam-db-autosync-mode))
 
     (use-package org-roam-ui
       :after org-roam
       :commands org-roam-ui-mode
       :bind ("C-c n u" . org-roam-ui-mode))
-
-    ;; 他モードでも補完を有効に（例: org-capture など）
-    (setq org-roam-completion-everywhere t)
 
     ;; -------------------------------------------------------------
     ;; org-roam-capture-templates の設定

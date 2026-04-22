@@ -89,6 +89,10 @@
 (defvar flycheck-checkers nil)
 (defvar org-ai-api-key nil)
 (defvar neo-buffer-name "*NeoTree*")
+(defvar config-test--org-roam-autosync-enabled nil)
+
+(defun org-roam-db-autosync-mode (&rest _args)
+  (setq config-test--org-roam-autosync-enabled t))
 
 (defun org-roam-node-read ()
   'config-test-node)
@@ -106,7 +110,6 @@
               marginalia-mode
               marginalia-cycle
               vertico-mode
-              org-roam-db-autosync-mode
               org-roam-ui-mode
               org-ai-mode
               org-ai-global-mode
