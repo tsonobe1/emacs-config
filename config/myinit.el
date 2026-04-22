@@ -500,8 +500,6 @@
 
 
   (my/after-org-load
-    (require 'org-duration)
-
     (defcustom my/org-effort-diff-threshold 10
       "Effort と CLOCK 合計の差がこれ（分）を超えたときに理由を聞く。"
       :type 'integer)
@@ -1088,8 +1086,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 ;; figure: key=value 段落から Hugo の figure を生成（新規追加）
 ;; ------------------------------
 (with-eval-after-load 'ox-hugo
-  (require 'cl-lib)
-
   ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
   (defun my/ox-hugo--extract-src (s)
     (let ((txt (string-trim s)))
