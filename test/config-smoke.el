@@ -161,6 +161,11 @@
   (should (equal (assoc "img" org-structure-template-alist)
                  '("img" . "#+CAPTION: \n#+ATTR_HTML: :width 600px :alt  :title "))))
 
+(ert-deftest config-smoke/oxhugo関連の既定値が維持される ()
+  (should (featurep 'ox-hugo))
+  (should org-export-with-tags)
+  (should (eq org-hugo-front-matter-format 'yaml)))
+
 (ert-deftest config-smoke/パッケージ初期化設定の既定値が維持される ()
   (should (equal package-archives
                  '(("melpa" . "https://melpa.org/packages/")

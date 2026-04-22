@@ -1013,7 +1013,11 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   (setq org-hugo-base-dir "~/devs/tsono-blog")
 
   ;; 開いている org ファイルのディレクトリにエクスポートする（ページバンドル対応）
-  (setq org-hugo-auto-set-export-dir t))
+  (setq org-hugo-auto-set-export-dir t)
+
+  ;; タグと front matter 形式は Hugo 向けの既定値を使う
+  (setq org-export-with-tags t
+        org-hugo-front-matter-format 'yaml))
 
 (defmacro my/after-ox-hugo-load (&rest body)
   "Evaluate BODY after ox-hugo has loaded."
@@ -1028,10 +1032,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 ;;──────────────────────────────────────────────
 ;; Hugo 用 Org-capture テンプレートの追加
 ;;──────────────────────────────────────────────
-
-(require 'ox-hugo)
-(setq org-export-with-tags t)  ;; タグをエクスポート時に含める
-(setq org-hugo-front-matter-format 'yaml)
 
 
 (defun my-org-hugo-new-post ()
