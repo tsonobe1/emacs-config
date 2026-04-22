@@ -53,17 +53,6 @@
 ;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
 (package-initialize)
 
-;; `org` パッケージを明示的にインストール
-(package-install 'org)
-
-;; ---------------------------------------------
-;; gnuplot の読み込み
-;; ---------------------------------------------
-
-;; `gnuplot.el` を読み込む（描画コマンド連携用）
-;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
-(require 'gnuplot)
-
 ;; 1回だけ package-refresh-contents を走らせながら必要パッケージを入れる
 (defvar my/package-contents-refreshed nil)
 
@@ -75,6 +64,23 @@
         (package-refresh-contents)
         (setq my/package-contents-refreshed t))
       (package-install pkg))))
+
+(defun my/os-path (windows-path non-windows-path)
+  "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
+  (if (eq system-type 'windows-nt)
+      windows-path
+    non-windows-path))
+
+;; `org` パッケージを明示的にインストール
+(package-install 'org)
+
+;; ---------------------------------------------
+;; gnuplot の読み込み
+;; ---------------------------------------------
+
+;; `gnuplot.el` を読み込む（描画コマンド連携用）
+;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
+(require 'gnuplot)
 
 ;; `use-package` がなければ先に入れる
 (my/ensure-packages-installed '(use-package))
@@ -113,9 +119,8 @@
 ;; Python 実行コマンドのパスを OS によって切り替える
 ;; Windows の場合と macOS/Linux の場合で別の仮想環境を指定
 (setq org-babel-python-command
-	  (if (eq system-type 'windows-nt)
-	      "C:/emacs-org/env/bin/python"
-	    "/Users/tsonobe/.emacs.d/env/bin/python"))
+	  (my/os-path "C:/emacs-org/env/bin/python"
+		      "/Users/tsonobe/.emacs.d/env/bin/python"))
 
 ;; Org Babel 実行時の確認プロンプトを無効にする
 (setq org-confirm-babel-evaluate nil)
@@ -174,17 +179,11 @@
 	      (lambda ()
 		(local-set-key (kbd "C-c t") 'my-toggle-truncate-lines)))
 
-(unless (package-installed-p 'ob-mermaid)
-  (package-refresh-contents)
-  (package-install 'ob-mermaid))
+(my/ensure-packages-installed '(ob-mermaid))
 
-(if (eq system-type 'windows-nt)
-    ;; Windowsの場合
-    (progn
-	(setq ob-mermaid-cli-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"))
-  ;; Macの場合
-  (progn
-    (setq ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")))
+(setq ob-mermaid-cli-path
+	(my/os-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
+		    "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -196,22 +195,19 @@
 ;; ---------------------------------------------------
 
 ;; Flycheck（構文チェックツール）が未インストールならインストールする
-(unless (package-installed-p 'flycheck)
-  (package-refresh-contents)
-  (package-install 'flycheck))
+(my/ensure-packages-installed '(flycheck))
 
 ;; textlint の実行ファイルと設定ファイルのパスを OS に応じて切り替える
-(if (eq system-type 'windows-nt)
-    ;; Windowsの場合
-    (progn
-	(setq flycheck-textlint-executable "C:/scoop/apps/nodejs16/current/bin/textlint.cmd") ;; textlintのパスを指定
-	(setq flycheck-textlint-config "C:/emacs-org/.textlintrc.json")) ;; 設定ファイルを指定
-  ;; Macの場合
-  ;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは`設定ファイルのパスを指定`は無視されるため、ホームディレクトリにもjsonをおいている
-  ;; シンボリックリンクにする or グローバルな設定を反映する方法を調べたほうがいいだろう
-  (progn
-    (setq flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint") ;; textlintのパスを指定（Homebrewなどでインストールした場合）
-    (setq flycheck-textlint-config "~/.emacs.d/.textlintrc.json"))) ;; 設定ファイルのパス
+;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは
+;; `設定ファイルのパスを指定` は無視されるため、ホームディレクトリにも
+;; json を置いている。シンボリックリンクにするか、グローバルな設定を
+;; 反映する方法を調べたほうがいいだろう。
+(setq flycheck-textlint-executable
+	(my/os-path "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
+		    "~/.nodebrew/node/v22.3.0/bin/textlint")) ;; textlintのパスを指定
+(setq flycheck-textlint-config
+	(my/os-path "C:/emacs-org/.textlintrc.json"
+		    "~/.emacs.d/.textlintrc.json")) ;; 設定ファイルのパス
 
 ;; textlint を Flycheck のチェッカーとして定義する
 (flycheck-define-checker textlint
@@ -267,24 +263,20 @@
 ;; -------------------------------------------------------------
 
 ;; org-roam がインストールされていない場合はインストールする
-(unless (package-installed-p 'org-roam)
-  (package-refresh-contents)
-  (package-install 'org-roam))
+(my/ensure-packages-installed '(org-roam))
 
 ;; org-roam を読み込む
 (require 'org-roam)
 
 ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
 (setq org-roam-directory
-	  (file-truename (if (eq system-type 'windows-nt)
-			     "C:/emacs-org/org-roam"
-			   "~/.emacs.d/org-roam")))
+	  (file-truename (my/os-path "C:/emacs-org/org-roam"
+				     "~/.emacs.d/org-roam")))
 
 ;; データベースファイルの保存先を指定
 (setq org-roam-db-location
-	  (if (eq system-type 'windows-nt)
-	      "C:/emacs-org/org-roam/org-roam.db"
-	    "~/.emacs.d/org-roam/org-roam.db"))
+	  (my/os-path "C:/emacs-org/org-roam/org-roam.db"
+		      "~/.emacs.d/org-roam/org-roam.db"))
 
 ;; org-roam のデータベース同期を自動で行う
 (org-roam-db-autosync-mode)
@@ -365,27 +357,21 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
-(setq org-capture-templates
-	`(("t" "Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
-						"C:\\emacs-org\\inbox.org"
-					      "~/.emacs.d/inbox.org") "📥 INBOX")
-	   "** TODO %?")
-	  ("w" "Work Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
-						     "C:\\emacs-org\\inbox.org"
-						   "~/.emacs.d/inbox.org") "📥 INBOX")
-	   "** TODO %?  :work:")
-	  ("p" "Private Todo" entry (file+headline ,(if (eq system-type 'windows-nt)
-							"C:\\emacs-org\\inbox.org"
-						      "~/.emacs.d/inbox.org") "📥 INBOX")
-	   "** TODO %?  :private:")
-	  ("s" "Someday" entry (file+headline ,(if (eq system-type 'windows-nt)
-						   "C:\\emacs-org\\inbox.org"
-						 "~/.emacs.d/inbox.org") "🤔 Someday")
-	   "** SAMEDAY %?")
-   ("h" "Hugo blog post" plain
-       (function my-org-hugo-new-post)
-       ""
-       :empty-lines 1)))
+(let ((inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
+				"~/.emacs.d/inbox.org")))
+  (setq org-capture-templates
+	  `(("t" "Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	     "** TODO %?")
+	    ("w" "Work Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	     "** TODO %?  :work:")
+	    ("p" "Private Todo" entry (file+headline ,inbox-file "📥 INBOX")
+	     "** TODO %?  :private:")
+	    ("s" "Someday" entry (file+headline ,inbox-file "🤔 Someday")
+	     "** SAMEDAY %?")
+	    ("h" "Hugo blog post" plain
+	     (function my-org-hugo-new-post)
+	     ""
+	     :empty-lines 1))))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の基本設定
@@ -396,9 +382,9 @@
 
 ;; org-agenda に読み込ませるファイルを OS に応じて切り替え
 ;; ここでは inbox.org のみを対象
-(setq org-agenda-files (list (if (eq system-type 'windows-nt)
-				   "C:/emacs-org/inbox.org"
-				 "~/.emacs.d/inbox.org")))
+(setq org-agenda-files
+	(list (my/os-path "C:/emacs-org/inbox.org"
+			  "~/.emacs.d/inbox.org")))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の表示に関する UI 設定
@@ -742,9 +728,8 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; secrets.elを読み込む
 (let ((secrets-file
-	 (if (eq system-type 'windows-nt)
-	     "C:/emacs-org/config/secrets.el" ;; Windowsのパス
-	   "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
+	 (my/os-path "C:/emacs-org/config/secrets.el" ;; Windowsのパス
+		     "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
   (when (file-exists-p secrets-file)
     (load secrets-file)))
 
