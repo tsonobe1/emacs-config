@@ -93,6 +93,12 @@
       "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
       (my/os-value windows-path non-windows-path))
 
+    (defmacro my/after-org-load (&rest body)
+      "Evaluate BODY after Org has loaded."
+      (declare (indent defun))
+      `(with-eval-after-load 'org
+         ,@body))
+
     ;; ---------------------------------------------
     ;; gnuplot の読み込み
     ;; ---------------------------------------------
@@ -456,8 +462,8 @@
     (setq org-ascii-headline-spacing '(0 . 0))
 
     ;; Org-mode 読み込み後に Markdown エクスポート用のバックエンドを読み込む
-    (eval-after-load "org"
-      '(require 'ox-md nil t))
+    (my/after-org-load
+      (require 'ox-md nil t))
 
 
     ;; ------------------------------------------------------------
@@ -496,7 +502,7 @@
 
 
   ;; キーバインドを設定 (org-modeだけで有効)
-  (with-eval-after-load 'org
+  (my/after-org-load
     (define-key org-mode-map (kbd "C-c C-x n") #'my/org-add-node-link-property ))
 
 
@@ -505,13 +511,13 @@
   ;; ------------------------------------------------------------
   ;; Effort プロパティで選べる時間を制限する
   ;; ------------------------------------------------------------
-  (with-eval-after-load 'org
+  (my/after-org-load
     ;; Effort_ALL に列挙した値だけを C-c C-x e 時に補完
     (setq org-global-properties
 	  '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00"))))
 
 
-  (with-eval-after-load 'org
+  (my/after-org-load
     ;; 時間文字列→分 に変換するために必要
     (require 'org-duration)
 
@@ -531,7 +537,7 @@
     (advice-add 'org-set-effort :after #'my/org-check-effort-breakdown))
 
 
-  (with-eval-after-load 'org
+  (my/after-org-load
     (require 'org-duration)
 
     (defcustom my/org-effort-diff-threshold 10
@@ -816,7 +822,7 @@
   ;; ----------------------------------------------------------
   ;; Org-mode の <ai + TAB に対応する構文テンプレートを追加
   ;; ----------------------------------------------------------
-  (with-eval-after-load 'org
+  (my/after-org-load
     (add-to-list 'org-structure-template-alist
 		 ;; <ai + tab --> #+begin_ai
 		 '("ai" . "ai")))
@@ -997,7 +1003,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
     (kill-new result)))
 
 ;; org-calc-progress のキーバインドを C-c C-p に設定
-(with-eval-after-load 'org
+(my/after-org-load
   (define-key org-mode-map (kbd "C-c C-p") #'org-calc-progress))
 
 
@@ -1019,7 +1025,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
   (setq org-hugo-auto-set-export-dir t))
 
 ;; Org-roamノードを ox-hugo でエクスポートするショートカット
-(with-eval-after-load 'org
+(my/after-org-load
   (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
 
 ;;──────────────────────────────────────────────
