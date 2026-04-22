@@ -76,6 +76,11 @@
   (should (eq (lookup-key org-mode-map (kbd "C-c C-p")) 'org-calc-progress))
   (should (eq (lookup-key org-mode-map (kbd "C-c C-n h")) 'org-hugo-export-to-md)))
 
+(ert-deftest config-smoke/orgagendaローカルキーバインドが維持される ()
+  (require 'org-agenda)
+  (should (eq (lookup-key org-agenda-mode-map (kbd "i")) 'org-agenda-clock-in))
+  (should (eq (lookup-key org-agenda-mode-map (kbd "o")) 'org-agenda-clock-out)))
+
 (ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()
   (should-not (bound-and-true-p amx-mode)))
 

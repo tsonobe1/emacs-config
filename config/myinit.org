@@ -438,14 +438,19 @@
   ;; ---------------------------------------------------------
   ;; Org Agenda のキーバインド拡張（ロード後に定義）
   ;; ---------------------------------------------------------
-  ;; org-agenda モードが読み込まれた後にカスタムキーバインドを定義
-  (eval-after-load 'org-agenda
-    '(progn
-       ;; `i`: 現在の agenda 項目の clock-in（作業開始）
-       (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
+  (defmacro my/after-org-agenda-load (&rest body)
+    "Evaluate BODY after org-agenda has loaded."
+    (declare (indent defun))
+    `(with-eval-after-load 'org-agenda
+       ,@body))
 
-       ;; `o`: clock-out（作業終了）
-       (define-key org-agenda-mode-map "o" 'org-agenda-clock-out)))
+  ;; org-agenda モードが読み込まれた後にカスタムキーバインドを定義
+  (my/after-org-agenda-load
+    ;; `i`: 現在の agenda 項目の clock-in（作業開始）
+    (define-key org-agenda-mode-map (kbd "i") #'org-agenda-clock-in)
+
+    ;; `o`: clock-out（作業終了）
+    (define-key org-agenda-mode-map (kbd "o") #'org-agenda-clock-out))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
