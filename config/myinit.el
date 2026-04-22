@@ -65,11 +65,15 @@
         (setq my/package-contents-refreshed t))
       (package-install pkg))))
 
+(defun my/os-value (windows-value non-windows-value)
+  "Return WINDOWS-VALUE on Windows, otherwise NON-WINDOWS-VALUE."
+  (if (eq system-type 'windows-nt)
+      windows-value
+    non-windows-value))
+
 (defun my/os-path (windows-path non-windows-path)
   "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
-  (if (eq system-type 'windows-nt)
-      windows-path
-    non-windows-path))
+  (my/os-value windows-path non-windows-path))
 
 ;; `org` パッケージを明示的にインストール
 (package-install 'org)
@@ -215,9 +219,9 @@
 (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
 
 (let ((node-exec-paths
-	 (if (eq system-type 'windows-nt)
-	     '("C:/scoop/apps/nodejs16/current" "C:/scoop/apps/nodejs16/current/bin")
-	   '("/Users/tsonobe/.nodebrew/current/bin/node")))
+	 (my/os-value '("C:/scoop/apps/nodejs16/current"
+			"C:/scoop/apps/nodejs16/current/bin")
+		      '("/Users/tsonobe/.nodebrew/current/bin/node")))
 	(node-path-prefix
 	 (my/os-path "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
 		     "/Users/tsonobe/.nodebrew/current/bin/node")))

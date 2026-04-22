@@ -100,6 +100,16 @@
   (should (string-prefix-p "/Users/tsonobe/.nodebrew/current/bin/node"
                            (getenv "PATH"))))
 
+(ert-deftest config-smoke/Windowsではnode用の実行パス候補がWindows側の一覧になる ()
+  (let* ((system-type 'windows-nt)
+         (node-exec-paths
+          (my/os-value '("C:/scoop/apps/nodejs16/current"
+                         "C:/scoop/apps/nodejs16/current/bin")
+                       '("/Users/tsonobe/.nodebrew/current/bin/node"))))
+    (should (equal node-exec-paths
+                   '("C:/scoop/apps/nodejs16/current"
+                     "C:/scoop/apps/nodejs16/current/bin")))))
+
 (ert-deftest config-smoke/Windowsでは主要パスがWindows側の文字列になる ()
   (let ((system-type 'windows-nt))
     (dolist (path-pair config-test--windows-path-pairs)
