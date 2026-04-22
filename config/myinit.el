@@ -36,11 +36,19 @@
 ;; Emacs の組み込みパッケージマネージャを有効にする
 (require 'package)
 
+(defun my/set-package-archives (archives)
+  "Set `package-archives' to ARCHIVES and reload cached metadata when needed."
+  (setq package-archives archives)
+  ;; `package-install' consults the in-memory `package-archive-contents'
+  ;; order, so re-read cache when archive priority changes mid-session.
+  (when package-archive-contents
+    (package-read-all-archive-contents)))
+
 ;; 使用するパッケージアーカイブ（リポジトリ）を設定
 ;; MELPA は多数の最新パッケージを含んでいるので特に重要
-(setq package-archives
-	  '(("gnu" . "https://elpa.gnu.org/packages/")
-	    ("melpa" . "https://melpa.org/packages/")))
+(my/set-package-archives
+ '(("gnu" . "https://elpa.gnu.org/packages/")
+   ("melpa" . "https://melpa.org/packages/")))
 
 ;; パッケージシステムを初期化（必ず package-archives 設定後に呼ぶ）
 (package-initialize)
@@ -56,10 +64,20 @@
 ;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
 (require 'gnuplot)
 
-;; パッケージ一覧を更新してインストール
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+;; 1回だけ package-refresh-contents を走らせながら必要パッケージを入れる
+(defvar my/package-contents-refreshed nil)
+
+(defun my/ensure-packages-installed (packages)
+  "Install PACKAGES, refreshing archives only once when needed."
+  (dolist (pkg packages)
+    (unless (package-installed-p pkg)
+      (unless my/package-contents-refreshed
+        (package-refresh-contents)
+        (setq my/package-contents-refreshed t))
+      (package-install pkg))))
+
+;; `use-package` がなければ先に入れる
+(my/ensure-packages-installed '(use-package))
 
 (require 'use-package)
 ;; 以降でuse-package に設定したパッケージが未インストールの場合、自動でインストールする
@@ -761,23 +779,18 @@ If PREFIX is empty, show a message and do nothing."
 		 ;; <ai + tab --> #+begin_ai
 		 '("ai" . "ai")))
 
-(require 'package)
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu"   . "https://elpa.gnu.org/packages/")))
+;; Vertico 系パッケージは MELPA を優先して解決する
+(my/set-package-archives
+ '(("melpa" . "https://melpa.org/packages/")
+   ("gnu"   . "https://elpa.gnu.org/packages/")))
 
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; 必要なパッケージを自動インストールする関数
+;; 必要なパッケージを自動インストールする
 (defvar my-required-packages
   '(vertico marginalia orderless consult embark embark-consult savehist compat)
   "List of packages to ensure are installed at launch.")
 
+(my/ensure-packages-installed my-required-packages)
 (require 'compat)
-(dolist (pkg my-required-packages)
-  (unless (package-installed-p pkg)
-    (package-install pkg)))
 
 ;; 補完スタイルにorderlessを利用する
 (with-eval-after-load 'orderless

@@ -1,1 +1,7 @@
 * My Emacs config
+
+Regenerate the tangled config artifact with:
+
+#+begin_src sh
+emacs --batch -Q -l scripts/tangle-myinit.el
+#+end_src
