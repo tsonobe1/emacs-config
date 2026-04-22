@@ -282,67 +282,67 @@
   (setq org-roam-completion-everywhere t)
 
   ;; org-roam のデータベース同期を自動で行う
-  (org-roam-db-autosync-mode))
+  (org-roam-db-autosync-mode)
+
+  ;; -------------------------------------------------------------
+  ;; org-roam-capture-templates の設定
+  ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
+  ;; -------------------------------------------------------------
+  (setq org-roam-capture-templates
+	    '(("d" "default" plain "%?"
+	       :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
+	       :unnarrowed t)
+
+	      ("n" "knowledge" plain "%?"
+	       :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+	       :unnarrowed t)
+
+	      ("w" "work" plain "%?"
+	       :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
+	       :unnarrowed t)
+
+	      ("t" "tool" plain "%?"
+	       :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
+	       :unnarrowed t)
+
+	      ("r" "recipe" plain "%?"
+	       :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
+	       :unnarrowed t)
+
+	      ("m" "money" plain "%?"
+	       :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
+	       :unnarrowed t)
+
+	      ("c" "discuss" plain "%?"
+	       :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
+	       :unnarrowed t)
+
+	      ;; Hugo投稿用テンプレート（キー: h）
+	      ("h" "hugo" plain "%?"
+	       :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
+				  "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
+	       :unnarrowed t)))
+
+  ;; -------------------------------------------------------------
+  ;; org-roam-dailies のテンプレート設定（日報用）
+  ;; -------------------------------------------------------------
+  (setq org-roam-dailies-capture-templates
+	    '(("d" "dailies" entry
+	       "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+	       :target (file+head "%<%Y-%m-%d>.org"
+				  "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
 
 (use-package org-roam-ui
   :after org-roam
   :commands org-roam-ui-mode
   :bind ("C-c n u" . org-roam-ui-mode))
-
-;; -------------------------------------------------------------
-;; org-roam-capture-templates の設定
-;; 各カテゴリごとに保存場所・ファイル名・タグを指定
-;; -------------------------------------------------------------
-(setq org-roam-capture-templates
-	  '(("d" "default" plain "%?"
-	     :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
-	     :unnarrowed t)
-
-	    ("n" "knowledge" plain "%?"
-	     :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
-	     :unnarrowed t)
-
-	    ("w" "work" plain "%?"
-	     :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :work:\n")
-	     :unnarrowed t)
-
-	    ("t" "tool" plain "%?"
-	     :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :tool:\n")
-	     :unnarrowed t)
-
-	    ("r" "recipe" plain "%?"
-	     :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :recipe:\n")
-	     :unnarrowed t)
-
-	    ("m" "money" plain "%?"
-	     :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :money:\n")
-	     :unnarrowed t)
-
-	    ("c" "discuss" plain "%?"
-	     :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-				"#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :discuss:\n")
-	     :unnarrowed t)
-   
-   ;; Hugo投稿用テンプレート（キー: h）
-  ("h" "hugo" plain "%?"
-  :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
-    "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
-   :unnarrowed t)))
-
-;; -------------------------------------------------------------
-;; org-roam-dailies のテンプレート設定（日報用）
-;; -------------------------------------------------------------
-(setq org-roam-dailies-capture-templates
-	  '(("d" "dailies" entry
-	     "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
-	     :target (file+head "%<%Y-%m-%d>.org"
-				"#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n"))))
 
 ;; org-captureをC-c cにバインド
 (global-set-key (kbd "C-c c") 'org-capture)

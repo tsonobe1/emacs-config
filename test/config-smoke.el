@@ -129,6 +129,18 @@
   (should (equal flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint"))
   (should (equal flycheck-textlint-config "~/.emacs.d/.textlintrc.json")))
 
+(ert-deftest config-smoke/orgroamのcapturetemplateが維持される ()
+  (should (equal (assoc "n" org-roam-capture-templates)
+                 '("n" "knowledge" plain "%?"
+                   :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
+                                      "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
+                   :unnarrowed t)))
+  (should (equal (assoc "d" org-roam-dailies-capture-templates)
+                 '("d" "dailies" entry
+                   "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+                   :target (file+head "%<%Y-%m-%d>.org"
+                                      "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
+
 (ert-deftest config-smoke/macos用のnode設定が維持される ()
   (should (equal (car exec-path) "/Users/tsonobe/.nodebrew/current/bin/node"))
   (should (string-prefix-p "/Users/tsonobe/.nodebrew/current/bin/node"
