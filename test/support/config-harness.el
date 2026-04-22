@@ -25,14 +25,6 @@
     (insert-file-contents path)
     (buffer-string)))
 
-(defun config-test--ensure-straight-bootstrap (base-dir)
-  "Create a dummy straight bootstrap file under BASE-DIR."
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" base-dir)))
-    (make-directory (file-name-directory bootstrap-file) t)
-    (with-temp-file bootstrap-file
-      (insert "(provide 'straight)\n"))))
-
 (defun config-test--tangle-config-copy ()
   "Tangle the current org config into the isolated temp directory."
   (setq config-test--tangled-file
@@ -50,8 +42,6 @@
   (unless config-test--loaded
     (setq config-test--temp-user-emacs-directory
           (make-temp-file "emacs-config-smoke-" t))
-    (config-test--ensure-straight-bootstrap
-     config-test--temp-user-emacs-directory)
     (let ((user-emacs-directory config-test--temp-user-emacs-directory)
           (package-user-dir
            (expand-file-name "elpa" config-test--temp-user-emacs-directory))

@@ -91,27 +91,6 @@
 
 (setq package-enable-at-startup nil)
 
-;; -------------------------------------------------------------
-;; straight.el のインストール（Windows 以外の環境でのみ実行）
-;; -------------------------------------------------------------
-(unless (eq system-type 'windows-nt)
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-	     (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	    (bootstrap-version 7))
-
-	;; bootstrap.el が存在しない場合は、インターネットから取得してインストール
-	(unless (file-exists-p bootstrap-file)
-	  (with-current-buffer
-	      (url-retrieve-synchronously
-	       "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-	       'silent 'inhibit-cookies)
-	    (goto-char (point-max))
-	    (eval-print-last-sexp)))
-
-	;; straight.el をロード
-	(load bootstrap-file nil 'nomessage)))
-
 ;; org-tempo を読み込むことで、<s TAB などのテンプレ展開が有効になる
 (require 'org-tempo)
 
