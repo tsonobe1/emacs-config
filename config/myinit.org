@@ -1008,6 +1008,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 (use-package ox-hugo
   :ensure t
   :after ox
+  :bind (:map org-mode-map
+         ("C-c C-n h" . org-hugo-export-to-md))
   :config
   ;; Hugo プロジェクトのベースディレクトリ
   (setq org-hugo-base-dir "~/devs/tsono-blog")
@@ -1026,10 +1028,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
      ,@body))
 
 (require 'cl-lib)
-
-;; Org-roamノードを ox-hugo でエクスポートするショートカット
-(my/after-org-load
-  (define-key org-mode-map (kbd "C-c C-n h") #'org-hugo-export-to-md))
 
 ;;──────────────────────────────────────────────
 ;; Hugo 用 Org-capture テンプレートの追加
