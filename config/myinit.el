@@ -962,7 +962,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
          (year (format-time-string "%Y"))
          (month (format-time-string "%m"))
          (bundle-path (format "%s/%s/%s" year month slug))  ; YYYY/MM/slug
-         (dir (expand-file-name (format "~/devs/tsono-blog/content/posts/%s" bundle-path)))
+         (dir (expand-file-name (format "content/posts/%s" bundle-path)
+                                org-hugo-base-dir))
          (file (expand-file-name "index.org" dir)))
     (make-directory dir t)
     (unless (file-exists-p file)

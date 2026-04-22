@@ -164,6 +164,7 @@
 (ert-deftest config-smoke/oxhugo関連の既定値が維持される ()
   (should (featurep 'ox-hugo))
   (should org-export-with-tags)
+  (should (equal org-hugo-base-dir "~/devs/tsono-blog"))
   (should (eq org-hugo-front-matter-format 'yaml)))
 
 (ert-deftest config-smoke/パッケージ初期化設定の既定値が維持される ()
