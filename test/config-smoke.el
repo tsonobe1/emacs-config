@@ -209,8 +209,6 @@
 
 (ert-deftest config-smoke/主要なフック登録が維持される ()
   (should (config-test--hook-contains-p 'dired-mode-hook 'org-download-enable))
-  (should (config-test--hook-contains-p 'gfm-mode-hook 'flycheck-mode))
-  (should (config-test--hook-contains-p 'markdown-mode-hook 'flycheck-mode))
   (should (config-test--hook-contains-p 'org-mode-hook 'flycheck-mode))
   (should (config-test--hook-contains-p 'org-mode-hook 'org-ai-mode))
   (should (config-test--hook-contains-p 'org-mode-hook 'org-download-enable)))

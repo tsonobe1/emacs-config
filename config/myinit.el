@@ -204,13 +204,13 @@
 	      (message (one-or-more not-newline)
 		       (zero-or-more "\n" (any " ") (one-or-more not-newline)))
 	      line-end))
-  :modes (text-mode markdown-mode gfm-mode org-mode web-mode)) ; 対応モード
+  :modes (text-mode org-mode web-mode)) ; 対応モード
 
 ;; 定義した textlint チェッカーを Flycheck に追加
 (add-to-list 'flycheck-checkers 'textlint)
 
 ;; textlint を有効化するモードで flycheck-mode を自動オン
-(dolist (hook '(gfm-mode-hook markdown-mode-hook org-mode-hook))
+(dolist (hook '(org-mode-hook))
   (add-hook hook 'flycheck-mode))
 
 ;; デフォルトチェッカーを textlint のみに設定（他の checker を無効化）
