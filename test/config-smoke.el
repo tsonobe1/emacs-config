@@ -95,6 +95,16 @@
                                         'my/org-agenda-enable-current-line-highlight))
   (should (eq hl-line-face 'underline)))
 
+(ert-deftest config-smoke/neotree作成後の表示設定が維持される ()
+  (should (config-test--hook-contains-p 'neo-after-create-hook
+                                        'my/neotree-disable-line-wrapping))
+  (with-current-buffer (get-buffer-create neo-buffer-name)
+    (setq truncate-lines nil
+          word-wrap t)
+    (my/neotree-disable-line-wrapping nil)
+    (should truncate-lines)
+    (should-not word-wrap)))
+
 (ert-deftest config-smoke/Mx拡張モードは既定で有効にならない ()
   (should-not (bound-and-true-p amx-mode)))
 

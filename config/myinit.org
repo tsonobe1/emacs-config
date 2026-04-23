@@ -780,12 +780,13 @@
     (global-set-key [f8] 'neotree-toggle)
     ;; neotreeのテーマを設定
     (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+    (defun my/neotree-disable-line-wrapping (&rest _args)
+      "Disable line wrapping in the NeoTree buffer."
+      (with-current-buffer (get-buffer neo-buffer-name)
+        (setq truncate-lines t)
+        (setq word-wrap nil)))
     ;; ディレクトリが更新されたら自動でneotreeをリフレッシュ
-    (add-hook 'neo-after-create-hook
-	      (lambda (_)
-		(with-current-buffer (get-buffer neo-buffer-name)
-		  (setq truncate-lines t)
-		  (setq word-wrap nil)))))
+    (add-hook 'neo-after-create-hook #'my/neotree-disable-line-wrapping))
 
   ;; all-the-iconsのインストールと設定
   (use-package all-the-icons
