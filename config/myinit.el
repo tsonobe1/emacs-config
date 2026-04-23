@@ -238,7 +238,6 @@
 ;; -------------------------------------------------------------
 
 (use-package org-roam
-  :ensure t
   :bind (("C-c n f" . org-roam-node-find)
 	     ("C-c n i" . org-roam-node-insert)
 	     ("C-c n t" . org-roam-buffer-toggle)
@@ -677,7 +676,6 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; neotreeのインストールと設定
 (use-package neotree
-  :ensure t
   :config
   ;; 起動時にneotreeを開くキーを設定
   (global-set-key [f8] 'neotree-toggle)
@@ -704,7 +702,6 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; org-aiのインストールと設定
 (use-package org-ai
-  :ensure t
   :commands (org-ai-mode
 	       org-ai-global-mode)
   :hook (org-mode . org-ai-mode)
@@ -768,7 +765,6 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; orderlessの設定
 (use-package orderless
-  :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
@@ -901,7 +897,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 ;; ox-hugo のインストールと設定（Org-roamからHugoへのエクスポート）
 ;; ------------------------------------------------------------
 (use-package ox-hugo
-  :ensure t
   :after ox
   :bind (:map org-mode-map
          ("C-c C-n h" . org-hugo-export-to-md))
