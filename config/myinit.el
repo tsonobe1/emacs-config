@@ -62,11 +62,17 @@
       (package-install pkg))))
 
 (defvar my-required-packages
-  '(use-package flycheck ob-mermaid vertico marginalia orderless consult embark
-             embark-consult savehist compat)
+  '(use-package flycheck ob-mermaid vertico marginalia orderless consult
+             embark embark-consult compat)
   "List of packages to ensure are installed at launch.")
 
 (my/ensure-packages-installed my-required-packages)
+
+(defvar my/package-selected-packages
+  '(compat consult embark embark-consult doom-modeline doom-themes
+           flycheck neotree org-ai org-download org-roam org-roam-ui
+           ob-mermaid orderless marginalia ox-hugo vertico)
+  "Package list registered by this config for package.el metadata.")
 
 (defun my/os-value (windows-value non-windows-value)
   "Return WINDOWS-VALUE on Windows, otherwise NON-WINDOWS-VALUE."
@@ -616,8 +622,9 @@
 ;; -------------------------------------------------------------
 (custom-set-variables
  '(custom-safe-themes
-   '("b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" default))
- '(package-selected-packages '(org doom-modeline doom-themes)))
+   '("b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" default)))
+
+(setq package-selected-packages my/package-selected-packages)
 
 ;; ----------------------------------------------------------
 ;; GUIのツールバーを非表示にして画面を広く使う

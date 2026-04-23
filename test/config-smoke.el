@@ -294,11 +294,11 @@
                    ("gnu" . "https://elpa.gnu.org/packages/"))))
   (should (eq package-enable-at-startup nil))
   (should (eq use-package-always-ensure t))
-  (should (equal package-selected-packages
-                 '(org doom-modeline doom-themes)))
+  (should (equal (sort (mapcar #'symbol-name package-selected-packages) #'string<)
+                 (sort (mapcar #'symbol-name my/package-selected-packages) #'string<)))
   (should (equal my-required-packages
                  '(use-package flycheck ob-mermaid vertico marginalia orderless
-                               consult embark embark-consult savehist compat))))
+                               consult embark embark-consult compat))))
 
 (ert-deftest config-smoke/パッケージ取得先の優先順を変更すると一覧を再読込する ()
   (let ((package-archives nil)
