@@ -78,7 +78,11 @@
 (ert-deftest config-smoke/orgローカルキーバインドが維持される ()
   (should (eq (lookup-key org-mode-map (kbd "C-c C-x n")) 'my/org-add-node-link-property))
   (should (eq (lookup-key org-mode-map (kbd "C-c C-p")) 'org-calc-progress))
-  (should (eq (lookup-key org-mode-map (kbd "C-c C-n h")) 'org-hugo-export-to-md)))
+  (should (eq (lookup-key org-mode-map (kbd "C-c C-n h")) 'org-hugo-export-to-md))
+  (with-temp-buffer
+    (org-mode)
+    (should (eq (local-key-binding (kbd "C-c t"))
+                'my-toggle-truncate-lines))))
 
 (ert-deftest config-smoke/orgagendaローカルキーバインドが維持される ()
   (require 'org-agenda)

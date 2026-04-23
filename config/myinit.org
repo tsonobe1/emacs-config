@@ -196,10 +196,12 @@
       (setq truncate-lines (not truncate-lines))
       (recenter))
 
+    (defun my/org-enable-truncate-lines-toggle ()
+      "Enable the truncate-lines toggle keybinding in Org buffers."
+      (local-set-key (kbd "C-c t") 'my-toggle-truncate-lines))
+
     ;; org-mode のバッファで C-c t にこのトグル関数をバインドする
-    (add-hook 'org-mode-hook
-	      (lambda ()
-		(local-set-key (kbd "C-c t") 'my-toggle-truncate-lines)))
+    (add-hook 'org-mode-hook #'my/org-enable-truncate-lines-toggle)
   #+end_src
 ** mermaid
 #+BEGIN_SRC emacs-lisp
