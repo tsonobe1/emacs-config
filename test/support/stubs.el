@@ -129,7 +129,6 @@
 (dolist (feature '(all-the-icons
                    compat
                    consult
-                   dockerfile-mode
                    doom-modeline
                    doom-themes
                    embark

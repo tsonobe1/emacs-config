@@ -153,11 +153,6 @@
 ;; C用の Babel モジュールを読み込む
 (require 'ob-C)
 
-;; dockerfile-modeの設定
-(use-package dockerfile-mode
-  :ensure t
-  :mode ("Dockerfile\\'" . dockerfile-mode))
-
 ;; markdown-modeの設定
 (use-package markdown-mode
   :ensure t
