@@ -221,6 +221,18 @@
   (should (equal org-hugo-base-dir "~/devs/tsono-blog"))
   (should (eq org-hugo-front-matter-format 'yaml)))
 
+(ert-deftest config-smoke/oxhugoのexporthookが維持される ()
+  (should (config-test--hook-contains-p 'org-export-filter-paragraph-functions
+                                        'my/ox-hugo-linkcard-paragraph-filter))
+  (should (config-test--hook-contains-p 'org-export-filter-paragraph-functions
+                                        'my/ox-hugo-figure-paragraph-filter))
+  (should (config-test--hook-contains-p 'org-export-filter-paragraph-functions
+                                        'my/ox-hugo-video-paragraph-filter))
+  (should (config-test--hook-contains-p 'org-export-filter-src-block-functions
+                                        'my/ox-hugo-src-block-filter))
+  (should (config-test--hook-contains-p 'org-export-before-processing-hook
+                                        'my/ox-hugo-promote-mermaid)))
+
 (ert-deftest config-smoke/パッケージ初期化設定の既定値が維持される ()
   (should (equal package-archives
                  '(("melpa" . "https://melpa.org/packages/")

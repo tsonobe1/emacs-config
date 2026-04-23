@@ -1036,6 +1036,24 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
       (setq txt (replace-regexp-in-string "\"" "&quot;" txt))
       txt))
 
+  ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
+  (defun my/ox-hugo--extract-src (s)
+    (let ((txt (string-trim s)))
+      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (when (string-match "\\`<\\(.*\\)>\\'" txt)
+        (setq txt (match-string 1 txt)))
+      (cond
+       ((string-match "\\[\\[file:\\([^]]+\\)\\]\\]" txt)
+        (match-string 1 txt))
+       ((string-match "\\`https?://[^[:space:]]+\\'" txt)
+        txt)
+       (t txt))))
+
+  (defun my/ox-hugo--quote (s)
+    "Hugo shortcode 用に値を \"…\" で括り、内部の \" を &quot; に。"
+    (format "\"%s\"" (replace-regexp-in-string "\"" "&quot;" s)))
+
   (defun my/ox-hugo-linkcard-paragraph-filter (text backend info)
     "段落を Hugo の linkcard に変換する。
 - 段落が key=value 行のみで、url= がある → {{< linkcard url=… [image=…] [title=…] [description=…] >}}
@@ -1044,8 +1062,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
       (let* ((trim  (string-trim text))
              (lines (split-string trim "\n+" t))
              url image title description)
-
-        ;; key=value を抽出（前後空白OK）
         (dolist (l lines)
           (cond
            ((string-match "\\`url\\s-*=[[:space:]]*\\(.+\\)\\'" l)
@@ -1056,9 +1072,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
             (setq title (my/ox-hugo--extract-text (match-string 1 l))))
            ((string-match "\\`description\\s-*=[[:space:]]*\\(.+\\)\\'" l)
             (setq description (my/ox-hugo--extract-text (match-string 1 l))))))
-
         (cond
-         ;; 1) key=value だけで構成 & url がある → 名前付き引数版
          ((and url
                (cl-every (lambda (l)
                            (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
@@ -1069,46 +1083,15 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                   (when title (format " title=\"%s\"" title))
                   (when description (format " description=\"%s\"" description))
                   " >}}\n"))
-
-         ;; 2) 単独URL段落（<…> / 裸URL） → 位置引数版
          ((or (string-match "\\`<https?://[^>[:space:]]+>\\'" trim)
               (string-match "\\`https?://[^[:space:]]+\\'" trim))
           (let ((u (my/ox-hugo--extract-url trim)))
             (if u (format "{{< linkcard \"%s\" >}}\n" u) text)))
-
-         ;; 3) それ以外はそのまま
          (t text)))))
 
-  ;; フック登録
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-linkcard-paragraph-filter))
-
-
-;; ------------------------------
-;; figure: key=value 段落から Hugo の figure を生成（新規追加）
-;; ------------------------------
-(my/after-ox-hugo-load
-  ;; src 値を抽出（"…" / <…> / [[file:…]] / URL / パス）
-  (defun my/ox-hugo--extract-src (s)
-    (let ((txt (string-trim s)))
-      (when (string-match "\\`[\"']\\(.*?\\)[\"']\\'" txt)
-        (setq txt (match-string 1 txt)))
-      (when (string-match "\\`<\\(.*\\)>\\'" txt)
-        (setq txt (match-string 1 txt)))
-      (cond
-       ;; [[file:/path/to/image.jpg]]
-       ((string-match "\\[\\[file:\\([^]]+\\)\\]\\]" txt)
-        (match-string 1 txt))
-       ;; http/https
-       ((string-match "\\`https?://[^[:space:]]+\\'" txt)
-        txt)
-       ;; それ以外はパスとして返す
-       (t txt))))
-
-  (defun my/ox-hugo--quote (s)
-    "Hugo shortcode 用に値を \"…\" で括り、内部の \" を &quot; に。"
-    (format "\"%s\"" (replace-regexp-in-string "\"" "&quot;" s)))
-
+  ;; ------------------------------
+  ;; figure: key=value 段落から Hugo の figure を生成
+  ;; ------------------------------
   (defun my/ox-hugo-figure-paragraph-filter (text backend info)
     "段落が key=value 行のみで src= が含まれる場合、
 {{< figure src=... [caption=...] [title=...] [alt=...] [width=...] >}} に変換。
@@ -1117,11 +1100,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
       (let* ((trim (string-trim text))
              (lines (split-string trim "\n+" t)))
         (cond
-         ;; 1) 単独の [[file:...]] だけ → 既定の変換に任せる
          ((string-match "\\`\\[\\[file:[^]]+\\]\\]\\'" trim)
           text)
-
-         ;; 2) key=value のみで構成 & src= を含む → figure 生成
          ((and (cl-every (lambda (l)
                            (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
                          lines)
@@ -1129,7 +1109,6 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                           (string-match-p "\\`src\\s-*=" l))
                         lines))
           (let (src caption title alt width)
-            ;; 値を収集（caption/title/alt/width は引用符付きでもOK）
             (dolist (l lines)
               (cond
                ((string-match "\\`src\\s-*=[[:space:]]*\\(.+\\)\\'" l)
@@ -1142,9 +1121,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                 (setq alt (my/ox-hugo--extract-text (match-string 1 l))))
                ((string-match "\\`width\\s-*=[[:space:]]*\\(.+\\)\\'" l)
                 (setq width (my/ox-hugo--extract-text (match-string 1 l))))))
-
             (when src
-              ;; 先頭スラッシュ補正（相対パスを /path にしたい場合）
               (when (and (not (string-match-p "\\`https?://" src))
                          (not (string-prefix-p "/" src)))
                 (setq src (concat "/" src)))
@@ -1155,16 +1132,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                       (when alt     (format " alt=%s"     (my/ox-hugo--quote alt)))
                       (when width   (format " width=%s"   (my/ox-hugo--quote width)))
                       " >}}\n"))))
-
-         ;; 3) それ以外はそのまま
          (t text)))))
 
-  ;; Hook 追加（この add-hook が linkcard より後に評価される想定。
-  ;; デフォルトで先頭に追加されるため、実行順は figure → linkcard）
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-figure-paragraph-filter))
-
-(my/after-ox-hugo-load
   (defun my/ox-hugo-video-paragraph-filter (text backend info)
     "段落が key=value 行のみで video= が含まれる場合、{{< video src=... [width=...] >}} に変換。"
     (when (org-export-derived-backend-p backend 'hugo)
@@ -1190,21 +1159,22 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
                       (when width (format " width=%s" (my/ox-hugo--quote width)))
                       " >}}\n"))))
          (t text)))))
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-video-paragraph-filter))
 
-
-
-(my/after-ox-hugo-load
   ;; mermaid ソースブロックを Markdown の ```mermaid フェンスコードに変換
   (defun my/ox-hugo-src-block-filter (text backend info)
     "Convert #+begin_src mermaid ... #+end_src into ```mermaid fenced code."
     (when (org-export-derived-backend-p backend 'hugo)
       (let ((trim (string-trim text)))
-        ;; Org の src block はすでに text に code 部分だけが入っている
         (when (string= (org-element-property :language (car (org-export-get-parent-element info))) "mermaid")
           (concat "```mermaid\n" trim "\n```")))))
 
+  ;; フック登録。figure は先頭追加されるので、実行順は figure → linkcard を維持する。
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-linkcard-paragraph-filter)
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-figure-paragraph-filter)
+  (add-hook 'org-export-filter-paragraph-functions
+            #'my/ox-hugo-video-paragraph-filter)
   (add-hook 'org-export-filter-src-block-functions
             #'my/ox-hugo-src-block-filter))
 
