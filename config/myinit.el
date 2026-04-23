@@ -62,8 +62,11 @@
       (package-install pkg))))
 
 (defvar my-required-packages
-  '(vertico marginalia orderless consult embark embark-consult savehist compat)
+  '(flycheck ob-mermaid vertico marginalia orderless consult embark
+             embark-consult savehist compat)
   "List of packages to ensure are installed at launch.")
+
+(my/ensure-packages-installed my-required-packages)
 
 (defun my/os-value (windows-value non-windows-value)
   "Return WINDOWS-VALUE on Windows, otherwise NON-WINDOWS-VALUE."
@@ -163,8 +166,6 @@
 ;; org-mode のバッファで C-c t にこのトグル関数をバインドする
 (add-hook 'org-mode-hook #'my/org-enable-truncate-lines-toggle)
 
-(my/ensure-packages-installed '(ob-mermaid))
-
 (setq ob-mermaid-cli-path
 	(my/os-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
 		    "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
@@ -177,9 +178,6 @@
 ;; ---------------------------------------------------
 ;; Flycheck + textlint を使った自然言語文法チェック設定
 ;; ---------------------------------------------------
-
-;; Flycheck（構文チェックツール）が未インストールならインストールする
-(my/ensure-packages-installed '(flycheck))
 
 ;; textlint の実行ファイルと設定ファイルのパスを OS に応じて切り替える
 ;; ~./emacs.d配下のorgファイルで有効になる。それ以外のファイルからは
@@ -731,8 +729,6 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; Vertico 系パッケージは MELPA を優先して解決する
 (my/set-package-archives my/melpa-priority-package-archives)
-
-(my/ensure-packages-installed my-required-packages)
 (require 'compat)
 
 ;; 補完候補を最大20行まで表示する
