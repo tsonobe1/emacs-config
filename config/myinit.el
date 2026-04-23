@@ -82,6 +82,16 @@
   "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
   (my/os-value windows-path non-windows-path))
 
+(defun my/inbox-file ()
+  "Return the shared inbox.org path for the current OS."
+  (my/os-path "C:\\emacs-org\\inbox.org"
+              "~/.emacs.d/inbox.org"))
+
+(defun my/inbox-file-slash ()
+  "Return the shared inbox.org path using slash separators."
+  (my/os-path "C:/emacs-org/inbox.org"
+              "~/.emacs.d/inbox.org"))
+
 (defmacro my/after-org-load (&rest body)
   "Evaluate BODY after Org has loaded."
   (declare (indent defun))
@@ -348,8 +358,7 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
-(let* ((inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
-				 "~/.emacs.d/inbox.org"))
+(let* ((inbox-file (my/inbox-file))
        (inbox-target `(file+headline ,inbox-file "📥 INBOX"))
        (someday-target `(file+headline ,inbox-file "🤔 Someday")))
   (setq org-capture-templates
@@ -376,8 +385,7 @@
 ;; org-agenda に読み込ませるファイルを OS に応じて切り替え
 ;; ここでは inbox.org のみを対象
 (setq org-agenda-files
-	(list (my/os-path "C:/emacs-org/inbox.org"
-			  "~/.emacs.d/inbox.org")))
+	(list (my/inbox-file-slash)))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の表示に関する UI 設定
