@@ -976,6 +976,17 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
     (define-key org-mode-map (kbd "C-c C-x C-s") #'my/org-set-story-point)
     (define-key org-mode-map (kbd "C-c C-x C-d") #'my/org-assign-efforts-based-on-storypoints)
 
+(defun my/org-progress-entry-at-point ()
+  "Return the current entry progress as a cons of storypoint and effort minutes."
+  (let* ((sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
+         (eff-min (org-duration-string-to-minutes
+                   (or (org-entry-get nil "Effort") "0:00"))))
+    (cons sp eff-min)))
+
+(defun my/org-done-progress-entries ()
+  "Return progress entries for DONE items in the current tree."
+  (org-map-entries #'my/org-progress-entry-at-point "TODO=\"DONE\"" 'tree))
+
 (defun org-calc-progress ()
   "現在の見出しツリーの Storypoint と Effort の進捗を算出し、ミニバッファ表示とクリップボードにコピーする。"
   (interactive)
@@ -983,14 +994,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
          (total-eff-min
           (let ((s (or (org-entry-get nil "Effort") "0:00")))
             (org-duration-string-to-minutes s)))
-         (entries
-          (org-map-entries
-           (lambda ()
-             (let* ((sp (string-to-number (or (org-entry-get nil "Storypoint") "0")))
-                    (eff-min (org-duration-string-to-minutes
-                              (or (org-entry-get nil "Effort") "0:00"))))
-               (cons sp eff-min)))
-           "TODO=\"DONE\"" 'tree))
+         (entries (my/org-done-progress-entries))
          (done-sp (apply #'+ (mapcar #'car entries)))
          (done-eff-min (apply #'+ (mapcar #'cdr entries)))
          (sp-pct (if (> total-sp 0)
@@ -1154,6 +1158,20 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
     "Hugo shortcode 用に値を \"…\" で括り、内部の \" を &quot; に。"
     (format "\"%s\"" (replace-regexp-in-string "\"" "&quot;" s)))
 
+  (defun my/ox-hugo-key-value-line-p (line)
+    "Return non-nil when LINE is a key=value pair."
+    (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" line))
+
+  (defun my/ox-hugo-all-key-value-lines-p (lines)
+    "Return non-nil when every item in LINES is a key=value pair."
+    (cl-every #'my/ox-hugo-key-value-line-p lines))
+
+  (defun my/ox-hugo-any-line-starts-with-p (prefix lines)
+    "Return non-nil when any item in LINES starts with PREFIX=."
+    (cl-some (lambda (line)
+               (string-match-p (format "\\`%s\\s-*=" (regexp-quote prefix)) line))
+             lines))
+
   (defun my/ox-hugo-linkcard-paragraph-filter (text backend info)
     "段落を Hugo の linkcard に変換する。
 - 段落が key=value 行のみで、url= がある → {{< linkcard url=… [image=…] [title=…] [description=…] >}}
@@ -1174,9 +1192,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
             (setq description (my/ox-hugo--extract-text (match-string 1 l))))))
         (cond
          ((and url
-               (cl-every (lambda (l)
-                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
-                         lines))
+               (my/ox-hugo-all-key-value-lines-p lines))
           (concat "{{< linkcard"
                   (format " url=\"%s\"" url)
                   (when image (format " image=\"%s\"" image))
@@ -1202,12 +1218,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
         (cond
          ((string-match "\\`\\[\\[file:[^]]+\\]\\]\\'" trim)
           text)
-         ((and (cl-every (lambda (l)
-                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
-                         lines)
-               (cl-some (lambda (l)
-                          (string-match-p "\\`src\\s-*=" l))
-                        lines))
+         ((and (my/ox-hugo-all-key-value-lines-p lines)
+               (my/ox-hugo-any-line-starts-with-p "src" lines))
           (let (src caption title alt width)
             (dolist (l lines)
               (cond
@@ -1240,12 +1252,8 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
       (let* ((trim  (string-trim text))
              (lines (split-string trim "\n+" t)))
         (cond
-         ((and (cl-every (lambda (l)
-                           (string-match-p "\\`[[:alpha:]]+\\s-*=[[:space:]]*.+\\'" l))
-                         lines)
-               (cl-some (lambda (l)
-                          (string-match-p "\\`video\\s-*=" l))
-                        lines))
+         ((and (my/ox-hugo-all-key-value-lines-p lines)
+               (my/ox-hugo-any-line-starts-with-p "video" lines))
           (let (video width)
             (dolist (l lines)
               (cond

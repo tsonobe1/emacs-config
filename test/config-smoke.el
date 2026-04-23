@@ -133,6 +133,19 @@
   (should (equal (nth 3 (assoc "s" org-capture-templates))
                  '(file+headline "~/.emacs.d/inbox.org" "🤔 Someday"))))
 
+(ert-deftest config-smoke/orgの進捗集計結果が維持される ()
+  (with-temp-buffer
+    (org-mode)
+    (insert "* Parent\n:PROPERTIES:\n:Storypoint: 8\n:Effort: 0:20\n:END:\n"
+            "** DONE Task A\n:PROPERTIES:\n:Storypoint: 3\n:Effort: 0:05\n:END:\n"
+            "** DONE Task B\n:PROPERTIES:\n:Storypoint: 5\n:Effort: 0:15\n:END:\n")
+    (goto-char (point-min))
+    (let (kill-ring)
+      (org-calc-progress)
+      (let ((result (current-kill 0)))
+        (should (string-match-p "Storypoint: 100\\.0% (8/8)" result))
+        (should (string-match-p "Effort: 100\\.0%" result))))))
+
 (ert-deftest config-smoke/macos用のパス設定が維持される ()
   (should (equal org-roam-directory (file-truename "~/.emacs.d/org-roam")))
   (should (equal org-roam-db-location "~/.emacs.d/org-roam/org-roam.db"))
@@ -249,6 +262,33 @@
                                         'my/ox-hugo-src-block-filter))
   (should (config-test--hook-contains-p 'org-export-before-processing-hook
                                         'my/ox-hugo-promote-mermaid)))
+
+(ert-deftest config-smoke/oxhugoのlinkcard段落変換が維持される ()
+  (cl-letf (((symbol-function 'org-export-derived-backend-p)
+             (lambda (&rest _args) t)))
+    (should (equal
+             (my/ox-hugo-linkcard-paragraph-filter
+              "url=https://example.com\ntitle=Example\ndescription=Summary"
+              'hugo nil)
+             "{{< linkcard url=\"https://example.com\" title=\"Example\" description=\"Summary\" >}}\n"))))
+
+(ert-deftest config-smoke/oxhugoのfigure段落変換が維持される ()
+  (cl-letf (((symbol-function 'org-export-derived-backend-p)
+             (lambda (&rest _args) t)))
+    (should (equal
+             (my/ox-hugo-figure-paragraph-filter
+              "src=images/sample.png\ncaption=Sample\nwidth=600"
+              'hugo nil)
+             "{{< figure src=\"/images/sample.png\" caption=\"Sample\" width=\"600\" >}}\n"))))
+
+(ert-deftest config-smoke/oxhugoのvideo段落変換が維持される ()
+  (cl-letf (((symbol-function 'org-export-derived-backend-p)
+             (lambda (&rest _args) t)))
+    (should (equal
+             (my/ox-hugo-video-paragraph-filter
+              "video=videos/sample.mp4\nwidth=800"
+              'hugo nil)
+             "{{< video src=\"videos/sample.mp4\" width=\"800\" >}}\n"))))
 
 (ert-deftest config-smoke/パッケージ初期化設定の既定値が維持される ()
   (should (equal package-archives
