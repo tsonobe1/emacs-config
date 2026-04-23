@@ -297,8 +297,8 @@
   (should (equal package-selected-packages
                  '(org doom-modeline doom-themes)))
   (should (equal my-required-packages
-                 '(flycheck ob-mermaid vertico marginalia orderless consult
-                           embark embark-consult savehist compat))))
+                 '(use-package flycheck ob-mermaid vertico marginalia orderless
+                               consult embark embark-consult savehist compat))))
 
 (ert-deftest config-smoke/パッケージ取得先の優先順を変更すると一覧を再読込する ()
   (let ((package-archives nil)

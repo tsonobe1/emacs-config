@@ -62,7 +62,7 @@
       (package-install pkg))))
 
 (defvar my-required-packages
-  '(flycheck ob-mermaid vertico marginalia orderless consult embark
+  '(use-package flycheck ob-mermaid vertico marginalia orderless consult embark
              embark-consult savehist compat)
   "List of packages to ensure are installed at launch.")
 
@@ -103,9 +103,6 @@
   "Add an Org structure TEMPLATE mapped by SHORTCUT."
   (add-to-list 'org-structure-template-alist
                (cons shortcut template)))
-
-;; `use-package` がなければ先に入れる
-(my/ensure-packages-installed '(use-package))
 
 (require 'use-package)
 ;; 以降でuse-package に設定したパッケージが未インストールの場合、自動でインストールする
