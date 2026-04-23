@@ -134,7 +134,6 @@
                    doom-themes
                    embark
                    flycheck
-                   gnuplot
                    marginalia
                    markdown-mode
                    neotree

@@ -108,14 +108,6 @@
   (add-to-list 'org-structure-template-alist
                (cons shortcut template)))
 
-;; ---------------------------------------------
-;; gnuplot の読み込み
-;; ---------------------------------------------
-
-;; `gnuplot.el` を読み込む（描画コマンド連携用）
-;; 必要に応じて `gnuplot-mode` や `org-babel-gnuplot` を併用
-(require 'gnuplot)
-
 ;; `use-package` がなければ先に入れる
 (my/ensure-packages-installed '(use-package))
 
