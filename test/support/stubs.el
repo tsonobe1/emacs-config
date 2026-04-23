@@ -125,8 +125,7 @@
               org-hugo-export-to-md))
   (defalias fn (lambda (&rest _args) nil)))
 
-(dolist (feature '(all-the-icons
-                   compat
+(dolist (feature '(compat
                    consult
                    doom-modeline
                    doom-themes

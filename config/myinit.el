@@ -708,10 +708,6 @@ If PREFIX is empty, show a message and do nothing."
   ;; ディレクトリが更新されたら自動でneotreeをリフレッシュ
   (add-hook 'neo-after-create-hook #'my/neotree-disable-line-wrapping))
 
-;; all-the-iconsのインストールと設定
-(use-package all-the-icons
-  :ensure t)
-
 ;; secrets.elを読み込む
 (let ((secrets-file (my/secrets-file)))
   (when (file-exists-p secrets-file)

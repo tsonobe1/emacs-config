@@ -775,10 +775,6 @@
     ;; ディレクトリが更新されたら自動でneotreeをリフレッシュ
     (add-hook 'neo-after-create-hook #'my/neotree-disable-line-wrapping))
 
-  ;; all-the-iconsのインストールと設定
-  (use-package all-the-icons
-    :ensure t)
-
 #+end_src
 
 * org-ai
