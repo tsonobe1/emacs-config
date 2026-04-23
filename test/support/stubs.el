@@ -90,6 +90,8 @@
 (defvar org-ai-api-key "config-test-org-ai-key")
 (defvar neo-buffer-name "*NeoTree*")
 (defvar config-test--org-roam-autosync-enabled nil)
+(defvar config-test--org-ai-global-mode-enabled nil)
+(defvar config-test--org-ai-yasnippets-installed nil)
 
 (defun org-roam-db-autosync-mode (&rest _args)
   (setq config-test--org-roam-autosync-enabled t))
@@ -103,6 +105,12 @@
 (defun org-roam-node-title (_node)
   "Config Test Node")
 
+(defun org-ai-global-mode (&rest _args)
+  (setq config-test--org-ai-global-mode-enabled t))
+
+(defun org-ai-install-yasnippets (&rest _args)
+  (setq config-test--org-ai-yasnippets-installed t))
+
 (dolist (fn '(which-key-mode
               doom-themes-neotree-config
               doom-themes-org-config
@@ -112,8 +120,6 @@
               vertico-mode
               org-roam-ui-mode
               org-ai-mode
-              org-ai-global-mode
-              org-ai-install-yasnippets
               org-download-enable
               neotree-toggle
               flycheck-mode

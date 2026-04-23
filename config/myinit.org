@@ -99,6 +99,11 @@
       (my/os-path "C:/emacs-org/inbox.org"
                   "~/.emacs.d/inbox.org"))
 
+    (defun my/secrets-file ()
+      "Return the shared secrets.el path for the current OS."
+      (my/os-path "C:/emacs-org/config/secrets.el"
+                  "~/.emacs.d/config/secrets.el"))
+
     (defmacro my/after-org-load (&rest body)
       "Evaluate BODY after Org has loaded."
       (declare (indent defun))
@@ -457,13 +462,14 @@
     `(with-eval-after-load 'org-agenda
        ,@body))
 
+  (defun my/org-agenda-bind-clock-keys ()
+    "Bind clock in and out commands in Org Agenda buffers."
+    (define-key org-agenda-mode-map (kbd "i") #'org-agenda-clock-in)
+    (define-key org-agenda-mode-map (kbd "o") #'org-agenda-clock-out))
+
   ;; org-agenda モードが読み込まれた後にカスタムキーバインドを定義
   (my/after-org-agenda-load
-    ;; `i`: 現在の agenda 項目の clock-in（作業開始）
-    (define-key org-agenda-mode-map (kbd "i") #'org-agenda-clock-in)
-
-    ;; `o`: clock-out（作業終了）
-    (define-key org-agenda-mode-map (kbd "o") #'org-agenda-clock-out))
+    (my/org-agenda-bind-clock-keys))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -797,11 +803,15 @@
 * org-ai
 #+begin_src emacs-lisp
   ;; secrets.elを読み込む
-  (let ((secrets-file
-	 (my/os-path "C:/emacs-org/config/secrets.el" ;; Windowsのパス
-		     "~/.emacs.d/config/secrets.el"))) ;; MacやLinuxのパス
+  (let ((secrets-file (my/secrets-file)))
     (when (file-exists-p secrets-file)
       (load secrets-file)))
+
+  (defun my/configure-org-ai-defaults ()
+    "Apply the shared default settings for org-ai."
+    (setq org-ai-openai-api-token org-ai-api-key
+          org-ai-default-chat-model "gpt-4.1-mini")
+    (org-ai-install-yasnippets))
 
   ;; org-aiのインストールと設定
   (use-package org-ai
@@ -814,14 +824,8 @@
     (org-ai-global-mode) ; installs global keybindings on C-c M-a
 
     :config
-    ;; 環境変数からAPIキーを取得する
-    (setq org-ai-openai-api-token org-ai-api-key)
-
-    ;; OpenAI モデルを指定
-    (setq org-ai-default-chat-model "gpt-4.1-mini") ; if you are on the gpt-4 beta:
-
-    ;; yasnippet 用の AI スニペットを読み込む（`ai` という展開補助）
-    (org-ai-install-yasnippets)) ; if you are using yasnippet and want `ai` snippets
+    ;; 環境変数からAPIキー取得、モデル指定、yasnippet をまとめて適用
+    (my/configure-org-ai-defaults))
 
 
   ;; ----------------------------------------------------------
@@ -1264,15 +1268,19 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
         (when (string= (org-element-property :language (car (org-export-get-parent-element info))) "mermaid")
           (concat "```mermaid\n" trim "\n```")))))
 
-  ;; フック登録。figure は先頭追加されるので、実行順は figure → linkcard を維持する。
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-linkcard-paragraph-filter)
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-figure-paragraph-filter)
-  (add-hook 'org-export-filter-paragraph-functions
-            #'my/ox-hugo-video-paragraph-filter)
-  (add-hook 'org-export-filter-src-block-functions
-            #'my/ox-hugo-src-block-filter))
+  (defun my/ox-hugo-register-export-filters ()
+    "Register shared ox-hugo export filters."
+    ;; figure は先頭追加されるので、実行順は figure → linkcard を維持する。
+    (add-hook 'org-export-filter-paragraph-functions
+              #'my/ox-hugo-linkcard-paragraph-filter)
+    (add-hook 'org-export-filter-paragraph-functions
+              #'my/ox-hugo-figure-paragraph-filter)
+    (add-hook 'org-export-filter-paragraph-functions
+              #'my/ox-hugo-video-paragraph-filter)
+    (add-hook 'org-export-filter-src-block-functions
+              #'my/ox-hugo-src-block-filter))
+
+  (my/ox-hugo-register-export-filters))
 
 ;; エクスポート時にソースコードを実行しない
 (setq org-export-use-babel nil)

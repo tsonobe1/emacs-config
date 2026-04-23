@@ -203,8 +203,11 @@
   (should (config-test--hook-contains-p 'org-mode-hook 'org-download-enable)))
 
 (ert-deftest config-smoke/orgaiの認証設定が維持される ()
+  (should (equal (my/secrets-file) "~/.emacs.d/config/secrets.el"))
   (should (equal org-ai-openai-api-token "config-test-org-ai-key"))
-  (should (equal org-ai-default-chat-model "gpt-4.1-mini")))
+  (should (equal org-ai-default-chat-model "gpt-4.1-mini"))
+  (should (bound-and-true-p config-test--org-ai-global-mode-enabled))
+  (should (bound-and-true-p config-test--org-ai-yasnippets-installed)))
 
 (ert-deftest config-smoke/補完設定の既定値が維持される ()
   (should (equal completion-styles '(orderless basic)))
