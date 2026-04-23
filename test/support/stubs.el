@@ -111,8 +111,7 @@
 (defun org-ai-install-yasnippets (&rest _args)
   (setq config-test--org-ai-yasnippets-installed t))
 
-(dolist (fn '(which-key-mode
-              doom-themes-neotree-config
+(dolist (fn '(doom-themes-neotree-config
               doom-themes-org-config
               doom-modeline-mode
               marginalia-mode
@@ -143,7 +142,6 @@
                    org-roam
                    ox-hugo
                    vertico
-                   which-key
                    yaml-mode))
   (provide feature))
 
