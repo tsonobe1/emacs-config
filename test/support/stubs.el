@@ -132,7 +132,6 @@
                    embark
                    flycheck
                    marginalia
-                   markdown-mode
                    neotree
                    ob-mermaid
                    orderless
@@ -140,8 +139,7 @@
                    org-download
                    org-roam
                    ox-hugo
-                   vertico
-                   yaml-mode))
+                   vertico))
   (provide feature))
 
 (provide 'stubs)

@@ -146,18 +146,6 @@
 ;; C用の Babel モジュールを読み込む
 (require 'ob-C)
 
-;; markdown-modeの設定
-(use-package markdown-mode
-  :ensure t
-  :mode ("\\.md\\'" . markdown-mode)
-  :init (setq markdown-command "multimarkdown"))
-
-;; yaml-modeの設定
-(use-package yaml-mode
-  :ensure t
-  :mode ("\\.yml\\'" . yaml-mode)
-  :mode ("\\.yaml\\'" . yaml-mode))
-
 ;; ---------------------------------------------
 ;; 行の折り返し表示をトグルする関数とキーバインド
 ;; ---------------------------------------------
