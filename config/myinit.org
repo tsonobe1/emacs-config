@@ -90,12 +90,57 @@
           windows-path
         non-windows-path))
 
+    (defconst my/python-exec-windows-path "C:/emacs-org/env/bin/python"
+      "Windows Python executable path.")
+    (defconst my/python-exec-non-windows-path "/Users/tsonobe/.emacs.d/env/bin/python"
+      "Non-Windows Python executable path.")
+
     (defconst my/inbox-file-windows-path "C:\\emacs-org\\inbox.org"
       "Windows inbox path in backslash format.")
     (defconst my/inbox-file-windows-slash-path "C:/emacs-org/inbox.org"
       "Windows inbox path in slash format.")
     (defconst my/inbox-file-non-windows-path "~/.emacs.d/inbox.org"
       "Non-Windows inbox path.")
+
+    (defconst my/mermaid-cli-windows-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
+      "Windows mermaid CLI path.")
+    (defconst my/mermaid-cli-non-windows-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"
+      "Non-Windows mermaid CLI path.")
+
+    (defconst my/textlint-executable-windows-path "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
+      "Windows textlint executable path.")
+    (defconst my/textlint-executable-non-windows-path "~/.nodebrew/node/v22.3.0/bin/textlint"
+      "Non-Windows textlint executable path.")
+    (defconst my/textlint-config-windows-path "C:/emacs-org/.textlintrc.json"
+      "Windows textlint config path.")
+    (defconst my/textlint-config-non-windows-path "~/.emacs.d/.textlintrc.json"
+      "Non-Windows textlint config path.")
+
+    (defconst my/nodejs-home-windows-path "C:/scoop/apps/nodejs16/current"
+      "Windows Node.js home path.")
+    (defconst my/nodejs-bin-windows-path "C:/scoop/apps/nodejs16/current/bin"
+      "Windows Node.js bin path.")
+    (defconst my/nodejs-path-windows
+      (list my/nodejs-home-windows-path
+            my/nodejs-bin-windows-path)
+      "Windows Node.js path candidates.")
+    (defconst my/nodejs-path-non-windows '("/Users/tsonobe/.nodebrew/current/bin/node")
+      "Non-Windows Node.js path candidates.")
+    (defconst my/nodejs-path-prefix-windows
+      (concat my/nodejs-home-windows-path ";" my/nodejs-bin-windows-path ";")
+      "Windows PATH prefix for Node.js.")
+    (defconst my/nodejs-path-prefix-non-windows "/Users/tsonobe/.nodebrew/current/bin/node"
+      "Non-Windows PATH prefix for Node.js.")
+
+    (defconst my/org-roam-directory-windows-path "C:/emacs-org/org-roam"
+      "Windows org-roam directory path.")
+    (defconst my/org-roam-directory-non-windows-path "~/.emacs.d/org-roam"
+      "Non-Windows org-roam directory path.")
+    (defconst my/org-roam-db-windows-path "C:/emacs-org/org-roam/org-roam.db"
+      "Windows org-roam DB path.")
+    (defconst my/org-roam-db-non-windows-path "~/.emacs.d/org-roam/org-roam.db"
+      "Non-Windows org-roam DB path.")
+
     (defconst my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"
       "Windows secrets file path.")
     (defconst my/secrets-file-non-windows-path "~/.emacs.d/config/secrets.el"
@@ -146,8 +191,8 @@
     ;; Python 実行コマンドのパスを OS によって切り替える
     ;; Windows の場合と macOS/Linux の場合で別の仮想環境を指定
     (setq org-babel-python-command
-	  (my/os-path "C:/emacs-org/env/bin/python"
-		      "/Users/tsonobe/.emacs.d/env/bin/python"))
+	  (my/os-path my/python-exec-windows-path
+		      my/python-exec-non-windows-path))
 
     ;; Org Babel 実行時の確認プロンプトを無効にする
     (setq org-confirm-babel-evaluate nil)
@@ -197,8 +242,8 @@
 ** mermaid
 #+BEGIN_SRC emacs-lisp
   (setq ob-mermaid-cli-path
-	(my/os-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
-		    "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
+	(my/os-path my/mermaid-cli-windows-path
+		    my/mermaid-cli-non-windows-path))
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -217,11 +262,11 @@
   ;; json を置いている。シンボリックリンクにするか、グローバルな設定を
   ;; 反映する方法を調べたほうがいいだろう。
   (setq flycheck-textlint-executable
-	(my/os-path "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
-		    "~/.nodebrew/node/v22.3.0/bin/textlint")) ;; textlintのパスを指定
+	(my/os-path my/textlint-executable-windows-path
+		    my/textlint-executable-non-windows-path)) ;; textlintのパスを指定
   (setq flycheck-textlint-config
-	(my/os-path "C:/emacs-org/.textlintrc.json"
-		    "~/.emacs.d/.textlintrc.json")) ;; 設定ファイルのパス
+	(my/os-path my/textlint-config-windows-path
+		    my/textlint-config-non-windows-path)) ;; 設定ファイルのパス
 
   ;; textlint を Flycheck のチェッカーとして定義する
   (flycheck-define-checker textlint
@@ -253,12 +298,11 @@
 ** node
 #+BEGIN_SRC emacs-lisp
   (let ((node-exec-paths
-	 (my/os-path '("C:/scoop/apps/nodejs16/current"
-		       "C:/scoop/apps/nodejs16/current/bin")
-		    '("/Users/tsonobe/.nodebrew/current/bin/node")))
+	 (my/os-path my/nodejs-path-windows
+		    my/nodejs-path-non-windows))
 	(node-path-prefix
-	 (my/os-path "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
-		     "/Users/tsonobe/.nodebrew/current/bin/node")))
+	 (my/os-path my/nodejs-path-prefix-windows
+		     my/nodejs-path-prefix-non-windows)))
     ;; exec-path に Node.js のパスを追加
     (setq exec-path (append node-exec-paths exec-path))
 
@@ -292,13 +336,13 @@
       :config
       ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
       (setq org-roam-directory
-	    (file-truename (my/os-path "C:/emacs-org/org-roam"
-				       "~/.emacs.d/org-roam")))
+	    (file-truename (my/os-path my/org-roam-directory-windows-path
+				       my/org-roam-directory-non-windows-path)))
 
       ;; データベースファイルの保存先を指定
       (setq org-roam-db-location
-	    (my/os-path "C:/emacs-org/org-roam/org-roam.db"
-			"~/.emacs.d/org-roam/org-roam.db"))
+	    (my/os-path my/org-roam-db-windows-path
+			my/org-roam-db-non-windows-path))
 
       ;; 他モードでも補完を有効に（例: org-capture など）
       (setq org-roam-completion-everywhere t)
