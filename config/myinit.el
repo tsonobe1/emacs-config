@@ -89,6 +89,10 @@
   "Windows inbox path in slash format.")
 (defconst my/inbox-file-non-windows-path "~/.emacs.d/inbox.org"
   "Non-Windows inbox path.")
+(defconst my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"
+  "Windows secrets file path.")
+(defconst my/secrets-file-non-windows-path "~/.emacs.d/config/secrets.el"
+  "Non-Windows secrets file path.")
 
 (defun my/inbox-file ()
   "Return the shared inbox.org path for the current OS."
@@ -102,8 +106,8 @@
 
 (defun my/secrets-file ()
   "Return the shared secrets.el path for the current OS."
-  (my/os-path "C:/emacs-org/config/secrets.el"
-              "~/.emacs.d/config/secrets.el"))
+  (my/os-path my/secrets-file-windows-path
+              my/secrets-file-non-windows-path))
 
 (defmacro my/after-org-load (&rest body)
   "Evaluate BODY after Org has loaded."

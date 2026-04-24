@@ -214,6 +214,8 @@
   (should (config-test--hook-contains-p 'org-mode-hook 'org-download-enable)))
 
 (ert-deftest config-smoke/orgaiの認証設定が維持される ()
+  (should (equal my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"))
+  (should (equal my/secrets-file-non-windows-path "~/.emacs.d/config/secrets.el"))
   (should (equal (my/secrets-file) "~/.emacs.d/config/secrets.el"))
   (should (equal org-ai-openai-api-token "config-test-org-ai-key"))
   (should (equal org-ai-default-chat-model "gpt-4.1-mini"))
