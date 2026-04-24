@@ -222,6 +222,11 @@
   (should (bound-and-true-p config-test--org-ai-global-mode-enabled))
   (should (bound-and-true-p config-test--org-ai-yasnippets-installed)))
 
+(ert-deftest config-smoke/Windows向けのsecrets設定が維持される ()
+  (let ((system-type 'windows-nt))
+    (should (equal (my/secrets-file) "C:/emacs-org/config/secrets.el"))
+    (should (equal my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"))))
+
 (ert-deftest config-smoke/補完設定の既定値が維持される ()
   (should (equal completion-styles '(orderless basic)))
   (should (equal completion-category-overrides
