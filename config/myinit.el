@@ -77,15 +77,11 @@
   (delete-dups (append my-required-packages my/package-selected-extra-packages))
   "Package list registered by this config for package.el metadata.")
 
-(defun my/os-value (windows-value non-windows-value)
-  "Return WINDOWS-VALUE on Windows, otherwise NON-WINDOWS-VALUE."
-  (if (eq system-type 'windows-nt)
-      windows-value
-    non-windows-value))
-
 (defun my/os-path (windows-path non-windows-path)
   "Return WINDOWS-PATH on Windows, otherwise NON-WINDOWS-PATH."
-  (my/os-value windows-path non-windows-path))
+  (if (eq system-type 'windows-nt)
+      windows-path
+    non-windows-path))
 
 (defun my/inbox-file ()
   "Return the shared inbox.org path for the current OS."
@@ -224,9 +220,9 @@
 (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
 
 (let ((node-exec-paths
-	 (my/os-value '("C:/scoop/apps/nodejs16/current"
-			"C:/scoop/apps/nodejs16/current/bin")
-		      '("/Users/tsonobe/.nodebrew/current/bin/node")))
+	 (my/os-path '("C:/scoop/apps/nodejs16/current"
+		       "C:/scoop/apps/nodejs16/current/bin")
+		    '("/Users/tsonobe/.nodebrew/current/bin/node")))
 	(node-path-prefix
 	 (my/os-path "C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
 		     "/Users/tsonobe/.nodebrew/current/bin/node")))
