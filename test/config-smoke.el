@@ -294,6 +294,10 @@
                    ("gnu" . "https://elpa.gnu.org/packages/"))))
   (should (eq package-enable-at-startup nil))
   (should (eq use-package-always-ensure t))
+  (should (= (length my/package-selected-packages)
+             (length (delete-dups my/package-selected-packages))))
+  (should (cl-every (lambda (pkg) (memq pkg my/package-selected-packages))
+                    my-required-packages))
   (should (equal (sort (mapcar #'symbol-name package-selected-packages) #'string<)
                  (sort (mapcar #'symbol-name my/package-selected-packages) #'string<)))
   (should (equal my-required-packages

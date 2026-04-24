@@ -68,10 +68,13 @@
 
 (my/ensure-packages-installed my-required-packages)
 
+(defvar my/package-selected-extra-packages
+  '(doom-modeline doom-themes org-ai org-download org-roam org-roam-ui
+                    neotree ox-hugo)
+  "Extra packages to register in package metadata.")
+
 (defvar my/package-selected-packages
-  '(compat consult embark embark-consult doom-modeline doom-themes
-           flycheck neotree org-ai org-download org-roam org-roam-ui
-           ob-mermaid orderless marginalia ox-hugo vertico)
+  (delete-dups (append my-required-packages my/package-selected-extra-packages))
   "Package list registered by this config for package.el metadata.")
 
 (defun my/os-value (windows-value non-windows-value)
