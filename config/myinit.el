@@ -901,7 +901,8 @@ If PREFIX is empty, show a message and do nothing."
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(defvar my/fibonacci-points '(1 2 3 5 8 13 21 34 55 89))
+(defconst my/fibonacci-points '(1 2 3 5 8 13 21 34 55 89)
+      "Fibonacci-like points available for Storypoint selection.")
 
     (defun my/org-set-story-point ()
       "Prompt for storypoint from Fibonacci values and set it as a property."
