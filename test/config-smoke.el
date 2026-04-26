@@ -288,6 +288,12 @@
                 (= savehist-called 1)))
     (should (bound-and-true-p completion-styles))))
 
+(ert-deftest config-smoke/補完有効化は起動後に即時実行される ()
+  (should (fboundp 'my/enable-completion-enhancements))
+  (should (bound-and-true-p after-init-time))
+  (should-not (memq 'my/enable-completion-enhancements
+                    (default-value 'after-init-hook))))
+
 (ert-deftest config-smoke/consultとembarkの連携拡張が読み込まれる ()
   (should (featurep 'embark-consult))
   (should (bound-and-true-p config-test--embark-consult-loaded)))
