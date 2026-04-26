@@ -863,7 +863,7 @@ If PREFIX is empty, show a message and do nothing."
     (warn "vertico-mode is not available. Install package: vertico"))
   ;; savehist-modeを使ってVerticoの順番を永続化する
   (my/enable-minor-mode-with-on 'savehist-mode))
-(if (and (boundp 'after-init-time) after-init-time)
+(if (bound-and-true-p after-init-time)
     (my/enable-completion-enhancements)
   (add-hook 'after-init-hook #'my/enable-completion-enhancements))
 
