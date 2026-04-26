@@ -328,8 +328,7 @@
 (add-to-list 'flycheck-checkers 'textlint)
 
 ;; textlint を有効化するモードで flycheck-mode を自動オン
-(dolist (hook '(org-mode-hook))
-  (add-hook hook 'flycheck-mode))
+(add-hook 'org-mode-hook #'flycheck-mode)
 
 ;; デフォルトチェッカーを textlint のみに設定（他の checker を無効化）
 (setq flycheck-checkers '(textlint))
