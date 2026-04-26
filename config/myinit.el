@@ -883,7 +883,7 @@ If PREFIX is empty, show a message and do nothing."
   ;; Marginalia must be activated in the :init section of use-package such that
   ;; the mode gets enabled right away. Note that this forces loading the
   ;; package.
-  (marginalia-mode))
+  (my/enable-minor-mode-with-on 'marginalia-mode))
 
 (defmacro my/after-consult-and-embark-load (&rest body)
   "Evaluate BODY after consult and embark have loaded."
