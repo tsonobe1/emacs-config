@@ -83,6 +83,15 @@
       windows-path
     non-windows-path))
 
+(defconst my/windows-sync-root "C:/emacs-org"
+  "Shared sync root used for Windows file settings.")
+(defconst my/windows-nodejs-root "C:/scoop/apps/nodejs16/current"
+  "Shared Node.js root used on Windows.")
+
+(defun my/windows-path->backslash (path)
+  "Convert slashes in PATH to backslashes."
+  (string-replace "/" "\\" path))
+
 (defconst my/user-home
   (file-name-as-directory
    (or (getenv "HOME")
@@ -90,67 +99,89 @@
        (expand-file-name "~")))
   "Current user's home directory.")
 
-(defconst my/python-exec-windows-path "C:/emacs-org/env/bin/python"
+(defconst my/python-exec-windows-path
+  (expand-file-name "env/bin/python" my/windows-sync-root)
   "Windows Python executable path.")
 (defconst my/python-exec-non-windows-path
   (expand-file-name "env/bin/python" user-emacs-directory)
   "Non-Windows Python executable path.")
 
-(defconst my/inbox-file-windows-path "C:\\emacs-org\\inbox.org"
-  "Windows inbox path in backslash format.")
-(defconst my/inbox-file-windows-slash-path "C:/emacs-org/inbox.org"
+(defconst my/inbox-file-windows-slash-path
+  (expand-file-name "inbox.org" my/windows-sync-root)
   "Windows inbox path in slash format.")
+(defconst my/inbox-file-windows-path
+  (my/windows-path->backslash my/inbox-file-windows-slash-path)
+  "Windows inbox path in backslash format.")
 (defconst my/inbox-file-non-windows-path
   (expand-file-name "inbox.org" user-emacs-directory)
   "Non-Windows inbox path.")
 
-(defconst my/mermaid-cli-windows-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
+(defconst my/mermaid-cli-windows-path
+  (expand-file-name "bin/mmdc.cmd" my/windows-nodejs-root)
   "Windows mermaid CLI path.")
+(defconst my/nodejs-v22-bin-non-windows-path
+  (expand-file-name ".nodebrew/node/v22.3.0/bin" my/user-home)
+  "Non-Windows Node.js v22.x bin path.")
 (defconst my/mermaid-cli-non-windows-path
-  (expand-file-name ".nodebrew/node/v22.3.0/bin/mmdc" my/user-home)
+  (expand-file-name "mmdc" my/nodejs-v22-bin-non-windows-path)
   "Non-Windows mermaid CLI path.")
 
-(defconst my/textlint-executable-windows-path "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
+(defconst my/textlint-executable-windows-path
+  (expand-file-name "bin/textlint.cmd" my/windows-nodejs-root)
   "Windows textlint executable path.")
 (defconst my/textlint-executable-non-windows-path
-  (expand-file-name ".nodebrew/node/v22.3.0/bin/textlint" my/user-home)
+  (expand-file-name "textlint" my/nodejs-v22-bin-non-windows-path)
   "Non-Windows textlint executable path.")
-(defconst my/textlint-config-windows-path "C:/emacs-org/.textlintrc.json"
+(defconst my/textlint-config-windows-path
+  (expand-file-name ".textlintrc.json" my/windows-sync-root)
   "Windows textlint config path.")
 (defconst my/textlint-config-non-windows-path
   (expand-file-name ".textlintrc.json" user-emacs-directory)
   "Non-Windows textlint config path.")
 
-(defconst my/nodejs-home-windows-path "C:/scoop/apps/nodejs16/current"
+(defconst my/nodejs-home-windows-path my/windows-nodejs-root
   "Windows Node.js home path.")
-(defconst my/nodejs-bin-windows-path "C:/scoop/apps/nodejs16/current/bin"
+(defconst my/nodejs-bin-windows-path
+  (expand-file-name "bin" my/nodejs-home-windows-path)
   "Windows Node.js bin path.")
+(defconst my/nodejs-home-non-windows-path
+  (expand-file-name ".nodebrew/current" my/user-home)
+  "Non-Windows Node.js home path.")
+(defconst my/nodejs-bin-non-windows-path
+  (expand-file-name "bin" my/nodejs-home-non-windows-path)
+  "Non-Windows Node.js bin path.")
+(defconst my/nodejs-exec-non-windows-path
+  (expand-file-name "node" my/nodejs-bin-non-windows-path)
+  "Non-Windows Node.js executable path.")
 (defconst my/nodejs-path-windows
   (list my/nodejs-home-windows-path
         my/nodejs-bin-windows-path)
   "Windows Node.js path candidates.")
 (defconst my/nodejs-path-non-windows
-  (list (expand-file-name ".nodebrew/current/bin/node" my/user-home))
+  (list my/nodejs-exec-non-windows-path)
   "Non-Windows Node.js path candidates.")
 (defconst my/nodejs-path-prefix-windows
   (concat my/nodejs-home-windows-path ";" my/nodejs-bin-windows-path ";")
   "Windows PATH prefix for Node.js.")
 (defconst my/nodejs-path-prefix-non-windows
-  (expand-file-name ".nodebrew/current/bin/node" my/user-home)
+  my/nodejs-exec-non-windows-path
   "Non-Windows PATH prefix for Node.js.")
 
-(defconst my/org-roam-directory-windows-path "C:/emacs-org/org-roam"
+(defconst my/org-roam-directory-windows-path
+  (expand-file-name "org-roam" my/windows-sync-root)
   "Windows org-roam directory path.")
 (defconst my/org-roam-directory-non-windows-path
   (expand-file-name "org-roam" user-emacs-directory)
   "Non-Windows org-roam directory path.")
-(defconst my/org-roam-db-windows-path "C:/emacs-org/org-roam/org-roam.db"
+(defconst my/org-roam-db-windows-path
+  (expand-file-name "org-roam/org-roam.db" my/windows-sync-root)
   "Windows org-roam DB path.")
 (defconst my/org-roam-db-non-windows-path
   (expand-file-name "org-roam/org-roam.db" user-emacs-directory)
   "Non-Windows org-roam DB path.")
 
-(defconst my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"
+(defconst my/secrets-file-windows-path
+  (expand-file-name "config/secrets.el" my/windows-sync-root)
   "Windows secrets file path.")
 (defconst my/secrets-file-non-windows-path
   (expand-file-name "config/secrets.el" user-emacs-directory)
@@ -159,6 +190,16 @@
 (defconst my/hugo-blog-root
   (expand-file-name "devs/tsono-blog" my/user-home)
   "Absolute path to the Hugo blog project root.")
+(defconst my/hugo-blog-name
+  (file-name-nondirectory (directory-file-name my/hugo-blog-root))
+  "Blog directory name used in capture paths.")
+(defconst my/org-roam-hugo-template-subdir
+  (concat "hugo/" my/hugo-blog-name "/content/posts/")
+  "Relative path for Hugo draft creation from org-roam capture.")
+(defconst my/org-roam-hugo-template-path
+  (concat my/org-roam-hugo-template-subdir
+          "%<%Y%m%d%H%M%S>-${slug}.org")
+  "org-roam capture target path for Hugo drafts.")
 
 (defun my/inbox-file ()
   "Return the shared inbox.org path for the current OS."
@@ -349,7 +390,7 @@
   ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
   ;; -------------------------------------------------------------
   (setq org-roam-capture-templates
-	    '(("d" "default" plain "%?"
+	    `(("d" "default" plain "%?"
 	       :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
 				  "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n")
 	       :unnarrowed t)
@@ -385,10 +426,10 @@
 	       :unnarrowed t)
 
 	      ;; Hugo投稿用テンプレート（キー: h）
-	      ("h" "hugo" plain "%?"
-	       :target (file+head "hugo/tsono-blog/content/posts/%<%Y%m%d%H%M%S>-${slug}.org"
+  ("h" "hugo" plain "%?"
+   :target (file+head ,my/org-roam-hugo-template-path
 				  "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
-	       :unnarrowed t)))
+   :unnarrowed t)))
 
   ;; -------------------------------------------------------------
   ;; org-roam-dailies のテンプレート設定（日報用）

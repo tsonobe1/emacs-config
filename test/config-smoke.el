@@ -27,18 +27,23 @@
   "Windows/non-Windows path pairs used by the shared config.")
 
 (defconst config-test--windows-source-paths
-  (list my/python-exec-windows-path
-        my/nodejs-home-windows-path
-        my/nodejs-bin-windows-path
-        my/mermaid-cli-windows-path
-        my/textlint-executable-windows-path
-        my/textlint-config-windows-path
-        my/org-roam-directory-windows-path
-        my/org-roam-db-windows-path
-        my/secrets-file-windows-path
-        my/inbox-file-windows-slash-path
-        my/inbox-file-windows-path)
-  "Windows path literals that should remain in `config/myinit.org`.")
+  '("my/windows-sync-root"
+    "my/windows-nodejs-root"
+    "my/python-exec-windows-path"
+    "my/inbox-file-windows-slash-path"
+    "my/inbox-file-windows-path"
+    "my/mermaid-cli-windows-path"
+    "my/textlint-executable-windows-path"
+    "my/textlint-config-windows-path"
+    "my/nodejs-home-windows-path"
+    "my/nodejs-bin-windows-path"
+    "my/nodejs-path-windows"
+    "my/nodejs-path-prefix-windows"
+    "my/org-roam-directory-windows-path"
+    "my/org-roam-db-windows-path"
+    "my/secrets-file-windows-path"
+    "my/org-roam-hugo-template-path")
+  "Windows-related config symbols that should remain defined in `config/myinit.org`.")
 
 (ert-deftest config-smoke/Emacsを起動するとorgソースを読む ()
   (with-temp-buffer
@@ -165,6 +170,16 @@
                    :target (file+head "%<%Y-%m-%d>.org"
                                       "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
 
+(ert-deftest config-smoke/orgroamのhugoテンプレートがブログ名由来で作られる ()
+  (let* ((hugo-template (plist-get (nthcdr 4 (assoc "h" org-roam-capture-templates))
+                                   :target))
+         (path (cadr hugo-template))
+         (expected-prefix (concat "hugo/"
+                                 my/hugo-blog-name
+                                 "/content/posts/")))
+    (should (string-prefix-p expected-prefix path))
+    (should (string-suffix-p "%<%Y%m%d%H%M%S>-${slug}.org" path))))
+
 (ert-deftest config-smoke/macos用のnode設定が維持される ()
   (should (equal (car exec-path) (car my/nodejs-path-non-windows)))
   (should (string-prefix-p (car my/nodejs-path-non-windows)
@@ -200,9 +215,7 @@
 (ert-deftest config-smoke/Windows向けの主要パス分岐が設定ソースに残っている ()
   (let ((source (config-test-file-contents (config-test-path "config" "myinit.org"))))
     (dolist (windows-path config-test--windows-source-paths)
-      (let ((needle (replace-regexp-in-string "\\\\"
-                                             "\\\\\\\\"
-                                             windows-path)))
+      (let ((needle windows-path))
         (should (string-match-p (regexp-quote needle) source))))))
 
 (ert-deftest config-smoke/主要なフック登録が維持される ()
@@ -212,7 +225,8 @@
   (should (config-test--hook-contains-p 'org-mode-hook 'org-download-enable)))
 
 (ert-deftest config-smoke/orgaiの認証設定が維持される ()
-  (should (equal my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"))
+  (should (equal my/secrets-file-windows-path
+                 (expand-file-name "config/secrets.el" my/windows-sync-root)))
   (should (equal my/secrets-file-non-windows-path
                  (my/secrets-file)))
   (should (equal org-ai-openai-api-token "config-test-org-ai-key"))
