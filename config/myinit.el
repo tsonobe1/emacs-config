@@ -853,10 +853,16 @@ If PREFIX is empty, show a message and do nothing."
 
 ;; vertico-modeとmarginalia-modeを有効化する
 (defun my/enable-completion-enhancements ()
-  (vertico-mode)
+  "Enable completion UX used by org-roam and related commands."
+  (if (fboundp 'vertico-mode)
+      (vertico-mode)
+    (warn "vertico-mode is not available. Install package: vertico"))
   ;; savehist-modeを使ってVerticoの順番を永続化する
-  (savehist-mode))
-(add-hook 'after-init-hook #'my/enable-completion-enhancements)
+  (when (fboundp 'savehist-mode)
+    (savehist-mode)))
+(if (and (boundp 'after-init-time) after-init-time)
+    (my/enable-completion-enhancements)
+  (add-hook 'after-init-hook #'my/enable-completion-enhancements))
 
 ;; Marginaliaの設定
 ;; Enable rich annotations using the Marginalia package
