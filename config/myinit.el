@@ -61,19 +61,19 @@
         (setq my/package-contents-refreshed t))
       (package-install pkg))))
 
-(defvar my-required-packages
+(defconst my-required-packages
   '(use-package flycheck ob-mermaid vertico marginalia orderless consult
              embark embark-consult compat)
   "List of packages to ensure are installed at launch.")
 
 (my/ensure-packages-installed my-required-packages)
 
-(defvar my/package-selected-extra-packages
+(defconst my/package-selected-extra-packages
   '(doom-modeline doom-themes org-ai org-download org-roam org-roam-ui
                     neotree ox-hugo)
   "Extra packages to register in package metadata.")
 
-(defvar my/package-selected-packages
+(defconst my/package-selected-packages
   (delete-dups (append my-required-packages my/package-selected-extra-packages))
   "Package list registered by this config for package.el metadata.")
 
