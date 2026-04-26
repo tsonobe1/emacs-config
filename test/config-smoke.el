@@ -295,6 +295,20 @@
                 (= savehist-called 1)))
     (should (bound-and-true-p completion-styles))))
 
+(ert-deftest config-smoke/補完ヘルパーは未定義モードを安全に無視する ()
+  (let ((value nil))
+    (my/enable-minor-mode-with-on 'non-existent-emacs-mode)
+    (should-not value)))
+
+(ert-deftest config-smoke/補完ヘルパーは有効化モードを引数1で呼ぶ ()
+  (let (enabled-with)
+    (cl-letf (((symbol-function 'mylike-mode)
+               (lambda (&rest args)
+                 (setq enabled-with args))))
+      (let ((mode-symbol 'mylike-mode))
+        (my/enable-minor-mode-with-on mode-symbol))
+      (should (equal enabled-with '(1))))))
+
 (ert-deftest config-smoke/補完有効化は起動後に即時実行される ()
   (should (fboundp 'my/enable-completion-enhancements))
   (should (bound-and-true-p after-init-time))
