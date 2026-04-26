@@ -852,14 +852,18 @@ If PREFIX is empty, show a message and do nothing."
 (setq vertico-count 20)
 
 ;; vertico-modeとmarginalia-modeを有効化する
+(defun my/enable-minor-mode-with-on (mode)
+  "Enable MODE with argument 1 when available."
+  (when (fboundp mode)
+    (funcall mode 1)))
+
 (defun my/enable-completion-enhancements ()
   "Enable completion UX used by org-roam and related commands."
   (if (fboundp 'vertico-mode)
-      (vertico-mode 1)
+      (my/enable-minor-mode-with-on 'vertico-mode)
     (warn "vertico-mode is not available. Install package: vertico"))
   ;; savehist-modeを使ってVerticoの順番を永続化する
-  (when (fboundp 'savehist-mode)
-    (savehist-mode 1)))
+  (my/enable-minor-mode-with-on 'savehist-mode))
 (if (and (boundp 'after-init-time) after-init-time)
     (my/enable-completion-enhancements)
   (add-hook 'after-init-hook #'my/enable-completion-enhancements))
