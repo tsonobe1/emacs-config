@@ -305,11 +305,11 @@
 ;; json を置いている。シンボリックリンクにするか、グローバルな設定を
 ;; 反映する方法を調べたほうがいいだろう。
 (setq flycheck-textlint-executable
-	(my/os-path my/textlint-executable-windows-path
-		    my/textlint-executable-non-windows-path)) ;; textlintのパスを指定
-(setq flycheck-textlint-config
-	(my/os-path my/textlint-config-windows-path
-		    my/textlint-config-non-windows-path)) ;; 設定ファイルのパス
+      (my/os-path my/textlint-executable-windows-path
+                  my/textlint-executable-non-windows-path) ; textlintのパスを指定
+      flycheck-textlint-config
+      (my/os-path my/textlint-config-windows-path
+                  my/textlint-config-non-windows-path)) ; 設定ファイルのパス
 
 ;; textlint を Flycheck のチェッカーとして定義する
 (flycheck-define-checker textlint
