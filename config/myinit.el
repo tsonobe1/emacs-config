@@ -368,18 +368,15 @@
 	     ("C-c n a" . org-roam-alias-add)
 	     ("C-c n r" . org-roam-ref-add))
   :config
-  ;; ノート保存ディレクトリの設定（OS に応じて切り替え）
+  ;; ノート保存ディレクトリとDBの設定（OS に応じて切り替え）
+  ;; 他モードでも補完を有効にする（例: org-capture など）
   (setq org-roam-directory
-	    (file-truename (my/os-path my/org-roam-directory-windows-path
-				       my/org-roam-directory-non-windows-path)))
-
-  ;; データベースファイルの保存先を指定
-  (setq org-roam-db-location
-	    (my/os-path my/org-roam-db-windows-path
-			my/org-roam-db-non-windows-path))
-
-  ;; 他モードでも補完を有効に（例: org-capture など）
-  (setq org-roam-completion-everywhere t)
+        (file-truename (my/os-path my/org-roam-directory-windows-path
+                                   my/org-roam-directory-non-windows-path))
+        org-roam-db-location
+        (my/os-path my/org-roam-db-windows-path
+                    my/org-roam-db-non-windows-path)
+        org-roam-completion-everywhere t)
 
   ;; org-roam のデータベース同期を自動で行う
   (org-roam-db-autosync-mode)
