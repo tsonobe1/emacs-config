@@ -939,6 +939,29 @@
       (my/enable-completion-enhancements)
     (add-hook 'after-init-hook #'my/enable-completion-enhancements))
 
+  (defun my/completion-status ()
+    "Return completion stack state as a compact plist."
+    (list :vertico-mode (bound-and-true-p vertico-mode)
+          :savehist-mode (bound-and-true-p savehist-mode)
+          :marginalia-mode (bound-and-true-p marginalia-mode)
+          :vertico-defined (fboundp 'vertico-mode)
+          :completion-styles completion-styles
+          :completion-category-overrides completion-category-overrides))
+
+  (defun my/completion-status-message ()
+    "Display Vertico/Orderless/Marginalia status for quick troubleshooting."
+    (interactive)
+    (let ((status (my/completion-status)))
+      (with-output-to-temp-buffer "*Completion Status*"
+        (princ "Completion status:\n")
+        (princ (format "  vertico-mode: %S\n" (plist-get status :vertico-mode)))
+        (princ (format "  vertico-defined: %S\n" (plist-get status :vertico-defined)))
+        (princ (format "  savehist-mode: %S\n" (plist-get status :savehist-mode)))
+        (princ (format "  marginalia-mode: %S\n" (plist-get status :marginalia-mode)))
+        (princ (format "  completion-styles: %S\n" (plist-get status :completion-styles)))
+        (princ (format "  completion-category-overrides: %S\n"
+                       (plist-get status :completion-category-overrides))))))
+
   ;; Marginaliaの設定
   ;; Enable rich annotations using the Marginalia package
   (use-package marginalia
