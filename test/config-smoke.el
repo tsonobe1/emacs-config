@@ -237,9 +237,30 @@
 (ert-deftest config-smoke/Windows向けのsecrets設定が維持される ()
   (let ((system-type 'windows-nt))
     (should (equal (my/secrets-file) my/secrets-file-windows-path))
+    (should (equal my/secrets-file-windows-path
+                   (expand-file-name "config/secrets.el" my/windows-sync-root)))
     (should (equal (my/os-path my/secrets-file-windows-path
                                my/secrets-file-non-windows-path)
                    my/secrets-file-windows-path))))
+
+(ert-deftest config-smoke/Windows向け主要定数が派生元基準で一貫する ()
+  (let ((system-type 'windows-nt))
+    (should (equal my/inbox-file-windows-path
+                   (my/windows-path->backslash
+                    (expand-file-name "inbox.org" my/windows-sync-root))))
+    (should (equal my/mermaid-cli-windows-path
+                   (expand-file-name "bin/mmdc.cmd" my/windows-nodejs-root)))
+    (should (equal my/textlint-executable-windows-path
+                   (expand-file-name "bin/textlint.cmd" my/windows-nodejs-root)))
+    (should (equal my/textlint-config-windows-path
+                   (expand-file-name ".textlintrc.json" my/windows-sync-root)))
+    (should (equal my/nodejs-bin-windows-path
+                   (expand-file-name "bin" my/nodejs-home-windows-path)))
+    (should (equal my/nodejs-path-prefix-windows
+                   (concat my/nodejs-home-windows-path
+                           ";"
+                           my/nodejs-bin-windows-path
+                           ";")))))
 
 (ert-deftest config-smoke/補完設定の既定値が維持される ()
   (should (equal completion-styles '(orderless basic)))
