@@ -14,33 +14,30 @@
   (member function (symbol-value hook)))
 
 (defconst config-test--windows-path-pairs
-  '(("C:/emacs-org/env/bin/python" "/Users/tsonobe/.emacs.d/env/bin/python")
-    ("C:/scoop/apps/nodejs16/current;C:/scoop/apps/nodejs16/current/bin;"
-     "/Users/tsonobe/.nodebrew/current/bin/node")
-    ("C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
-     "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc")
-    ("C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
-     "~/.nodebrew/node/v22.3.0/bin/textlint")
-    ("C:/emacs-org/.textlintrc.json" "~/.emacs.d/.textlintrc.json")
-    ("C:/emacs-org/org-roam" "~/.emacs.d/org-roam")
-    ("C:/emacs-org/org-roam/org-roam.db" "~/.emacs.d/org-roam/org-roam.db")
-    ("C:/emacs-org/config/secrets.el" "~/.emacs.d/config/secrets.el")
-    ("C:/emacs-org/inbox.org" "~/.emacs.d/inbox.org")
-    ("C:\\emacs-org\\inbox.org" "~/.emacs.d/inbox.org"))
+  `((,my/python-exec-windows-path ,my/python-exec-non-windows-path)
+    (,my/nodejs-path-prefix-windows ,my/nodejs-path-prefix-non-windows)
+    (,my/mermaid-cli-windows-path ,my/mermaid-cli-non-windows-path)
+    (,my/textlint-executable-windows-path ,my/textlint-executable-non-windows-path)
+    (,my/textlint-config-windows-path ,my/textlint-config-non-windows-path)
+    (,my/org-roam-directory-windows-path ,my/org-roam-directory-non-windows-path)
+    (,my/org-roam-db-windows-path ,my/org-roam-db-non-windows-path)
+    (,my/secrets-file-windows-path ,my/secrets-file-non-windows-path)
+    (,my/inbox-file-windows-slash-path ,my/inbox-file-non-windows-path)
+    (,my/inbox-file-windows-path ,my/inbox-file-non-windows-path))
   "Windows/non-Windows path pairs used by the shared config.")
 
 (defconst config-test--windows-source-paths
-  '("C:/emacs-org/env/bin/python"
-    "C:/scoop/apps/nodejs16/current"
-    "C:/scoop/apps/nodejs16/current/bin"
-    "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
-    "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
-    "C:/emacs-org/.textlintrc.json"
-    "C:/emacs-org/org-roam"
-    "C:/emacs-org/org-roam/org-roam.db"
-    "C:/emacs-org/config/secrets.el"
-    "C:/emacs-org/inbox.org"
-    "C:\\\\emacs-org\\\\inbox.org")
+  (list my/python-exec-windows-path
+        my/nodejs-home-windows-path
+        my/nodejs-bin-windows-path
+        my/mermaid-cli-windows-path
+        my/textlint-executable-windows-path
+        my/textlint-config-windows-path
+        my/org-roam-directory-windows-path
+        my/org-roam-db-windows-path
+        my/secrets-file-windows-path
+        my/inbox-file-windows-slash-path
+        my/inbox-file-windows-path)
   "Windows path literals that should remain in `config/myinit.org`.")
 
 (ert-deftest config-smoke/Emacsを起動するとorgソースを読む ()
@@ -147,14 +144,14 @@
         (should (string-match-p "Effort: 100\\.0%" result))))))
 
 (ert-deftest config-smoke/macos用のパス設定が維持される ()
-  (should (equal org-roam-directory (file-truename "~/.emacs.d/org-roam")))
-  (should (equal org-roam-db-location "~/.emacs.d/org-roam/org-roam.db"))
+  (should (equal org-roam-directory (file-truename my/org-roam-directory-non-windows-path)))
+  (should (equal org-roam-db-location my/org-roam-db-non-windows-path))
   (should org-roam-completion-everywhere)
   (should (bound-and-true-p config-test--org-roam-autosync-enabled))
-  (should (equal org-babel-python-command "/Users/tsonobe/.emacs.d/env/bin/python"))
-  (should (equal ob-mermaid-cli-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"))
-  (should (equal flycheck-textlint-executable "~/.nodebrew/node/v22.3.0/bin/textlint"))
-  (should (equal flycheck-textlint-config "~/.emacs.d/.textlintrc.json")))
+  (should (equal org-babel-python-command my/python-exec-non-windows-path))
+  (should (equal ob-mermaid-cli-path my/mermaid-cli-non-windows-path))
+  (should (equal flycheck-textlint-executable my/textlint-executable-non-windows-path))
+  (should (equal flycheck-textlint-config my/textlint-config-non-windows-path)))
 
 (ert-deftest config-smoke/orgroamのcapturetemplateが維持される ()
   (should (equal (assoc "n" org-roam-capture-templates)
@@ -176,12 +173,10 @@
 (ert-deftest config-smoke/Windowsではnode用の実行パス候補がWindows側の一覧になる ()
   (let* ((system-type 'windows-nt)
          (node-exec-paths
-          (my/os-path '("C:/scoop/apps/nodejs16/current"
-                       "C:/scoop/apps/nodejs16/current/bin")
-                     '("/Users/tsonobe/.nodebrew/current/bin/node"))))
+          (my/os-path my/nodejs-path-windows
+                     my/nodejs-path-non-windows)))
     (should (equal node-exec-paths
-                   '("C:/scoop/apps/nodejs16/current"
-                     "C:/scoop/apps/nodejs16/current/bin")))))
+                   my/nodejs-path-windows))))
 
 (ert-deftest config-smoke/Windowsでは主要パスがWindows側の文字列になる ()
   (let ((system-type 'windows-nt))
@@ -192,20 +187,23 @@
 
 (ert-deftest config-smoke/Windows向けのorg保存先文字列が維持される ()
   (let* ((system-type 'windows-nt)
-         (inbox-file (my/os-path "C:\\emacs-org\\inbox.org"
-                                 "~/.emacs.d/inbox.org")))
+         (inbox-file (my/os-path my/inbox-file-windows-path
+                                 my/inbox-file-non-windows-path)))
     (should (equal `(file+headline ,inbox-file "📥 INBOX")
-                   '(file+headline "C:\\emacs-org\\inbox.org" "📥 INBOX")))
+                   (list 'file+headline my/inbox-file-windows-path "📥 INBOX")))
     (should (equal `(file+headline ,inbox-file "🤔 Someday")
-                   '(file+headline "C:\\emacs-org\\inbox.org" "🤔 Someday")))
+                   (list 'file+headline my/inbox-file-windows-path "🤔 Someday")))
     (should (equal (list (my/os-path "C:/emacs-org/inbox.org"
                                      "~/.emacs.d/inbox.org"))
-                   '("C:/emacs-org/inbox.org")))))
+                   (list my/inbox-file-windows-slash-path)))))
 
 (ert-deftest config-smoke/Windows向けの主要パス分岐が設定ソースに残っている ()
   (let ((source (config-test-file-contents (config-test-path "config" "myinit.org"))))
     (dolist (windows-path config-test--windows-source-paths)
-      (should (string-match-p (regexp-quote windows-path) source)))))
+      (let ((needle (replace-regexp-in-string "\\\\"
+                                             "\\\\\\\\"
+                                             windows-path)))
+        (should (string-match-p (regexp-quote needle) source))))))
 
 (ert-deftest config-smoke/主要なフック登録が維持される ()
   (should (config-test--hook-contains-p 'dired-mode-hook 'org-download-enable))
@@ -224,8 +222,10 @@
 
 (ert-deftest config-smoke/Windows向けのsecrets設定が維持される ()
   (let ((system-type 'windows-nt))
-    (should (equal (my/secrets-file) "C:/emacs-org/config/secrets.el"))
-    (should (equal my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"))))
+    (should (equal (my/secrets-file) my/secrets-file-windows-path))
+    (should (equal (my/os-path my/secrets-file-windows-path
+                               my/secrets-file-non-windows-path)
+                   my/secrets-file-windows-path))))
 
 (ert-deftest config-smoke/補完設定の既定値が維持される ()
   (should (equal completion-styles '(orderless basic)))
