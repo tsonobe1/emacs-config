@@ -855,11 +855,11 @@ If PREFIX is empty, show a message and do nothing."
 (defun my/enable-completion-enhancements ()
   "Enable completion UX used by org-roam and related commands."
   (if (fboundp 'vertico-mode)
-      (vertico-mode)
+      (vertico-mode 1)
     (warn "vertico-mode is not available. Install package: vertico"))
   ;; savehist-modeを使ってVerticoの順番を永続化する
   (when (fboundp 'savehist-mode)
-    (savehist-mode)))
+    (savehist-mode 1)))
 (if (and (boundp 'after-init-time) after-init-time)
     (my/enable-completion-enhancements)
   (add-hook 'after-init-hook #'my/enable-completion-enhancements))
