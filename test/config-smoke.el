@@ -110,7 +110,7 @@
                  '((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|"
                              "DONE(d)" "CANCEL(c)"))))
   (should (eq org-log-done 'time))
-  (should (equal org-agenda-files '("~/.emacs.d/inbox.org"))))
+  (should (equal org-agenda-files (list my/inbox-file-non-windows-path))))
 
 (ert-deftest config-smoke/effort関連の設定と監視が維持される ()
   (should (equal org-global-properties
@@ -122,13 +122,13 @@
 
 (ert-deftest config-smoke/orgcaptureの保存先が維持される ()
   (should (equal (nth 3 (assoc "t" org-capture-templates))
-                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+                 `(file+headline ,my/inbox-file-non-windows-path "📥 INBOX")))
   (should (equal (nth 3 (assoc "w" org-capture-templates))
-                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+                 `(file+headline ,my/inbox-file-non-windows-path "📥 INBOX")))
   (should (equal (nth 3 (assoc "p" org-capture-templates))
-                 '(file+headline "~/.emacs.d/inbox.org" "📥 INBOX")))
+                 `(file+headline ,my/inbox-file-non-windows-path "📥 INBOX")))
   (should (equal (nth 3 (assoc "s" org-capture-templates))
-                 '(file+headline "~/.emacs.d/inbox.org" "🤔 Someday"))))
+                 `(file+headline ,my/inbox-file-non-windows-path "🤔 Someday"))))
 
 (ert-deftest config-smoke/orgの進捗集計結果が維持される ()
   (with-temp-buffer
@@ -166,8 +166,8 @@
                                       "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
 
 (ert-deftest config-smoke/macos用のnode設定が維持される ()
-  (should (equal (car exec-path) "/Users/tsonobe/.nodebrew/current/bin/node"))
-  (should (string-prefix-p "/Users/tsonobe/.nodebrew/current/bin/node"
+  (should (equal (car exec-path) (car my/nodejs-path-non-windows)))
+  (should (string-prefix-p (car my/nodejs-path-non-windows)
                            (getenv "PATH"))))
 
 (ert-deftest config-smoke/Windowsではnode用の実行パス候補がWindows側の一覧になる ()
@@ -193,8 +193,8 @@
                    (list 'file+headline my/inbox-file-windows-path "📥 INBOX")))
     (should (equal `(file+headline ,inbox-file "🤔 Someday")
                    (list 'file+headline my/inbox-file-windows-path "🤔 Someday")))
-    (should (equal (list (my/os-path "C:/emacs-org/inbox.org"
-                                     "~/.emacs.d/inbox.org"))
+    (should (equal (list (my/os-path my/inbox-file-windows-slash-path
+                                     my/inbox-file-non-windows-path))
                    (list my/inbox-file-windows-slash-path)))))
 
 (ert-deftest config-smoke/Windows向けの主要パス分岐が設定ソースに残っている ()
@@ -213,8 +213,8 @@
 
 (ert-deftest config-smoke/orgaiの認証設定が維持される ()
   (should (equal my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"))
-  (should (equal my/secrets-file-non-windows-path "~/.emacs.d/config/secrets.el"))
-  (should (equal (my/secrets-file) "~/.emacs.d/config/secrets.el"))
+  (should (equal my/secrets-file-non-windows-path
+                 (my/secrets-file)))
   (should (equal org-ai-openai-api-token "config-test-org-ai-key"))
   (should (equal org-ai-default-chat-model "gpt-4.1-mini"))
   (should (bound-and-true-p config-test--org-ai-global-mode-enabled))
@@ -253,7 +253,7 @@
 (ert-deftest config-smoke/oxhugo関連の既定値が維持される ()
   (should (featurep 'ox-hugo))
   (should org-export-with-tags)
-  (should (equal org-hugo-base-dir "~/devs/tsono-blog"))
+  (should (equal org-hugo-base-dir my/hugo-blog-root))
   (should (eq org-hugo-front-matter-format 'yaml)))
 
 (ert-deftest config-smoke/oxhugoのexporthookが維持される ()

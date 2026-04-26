@@ -90,30 +90,42 @@
           windows-path
         non-windows-path))
 
+    (defconst my/user-home
+      (file-name-as-directory
+       (or (getenv "HOME")
+           (getenv "USERPROFILE")
+           (expand-file-name "~")))
+      "Current user's home directory.")
+
     (defconst my/python-exec-windows-path "C:/emacs-org/env/bin/python"
       "Windows Python executable path.")
-    (defconst my/python-exec-non-windows-path "/Users/tsonobe/.emacs.d/env/bin/python"
+    (defconst my/python-exec-non-windows-path
+      (expand-file-name "env/bin/python" user-emacs-directory)
       "Non-Windows Python executable path.")
 
     (defconst my/inbox-file-windows-path "C:\\emacs-org\\inbox.org"
       "Windows inbox path in backslash format.")
     (defconst my/inbox-file-windows-slash-path "C:/emacs-org/inbox.org"
       "Windows inbox path in slash format.")
-    (defconst my/inbox-file-non-windows-path "~/.emacs.d/inbox.org"
+    (defconst my/inbox-file-non-windows-path
+      (expand-file-name "inbox.org" user-emacs-directory)
       "Non-Windows inbox path.")
 
     (defconst my/mermaid-cli-windows-path "C:/scoop/apps/nodejs16/current/bin/mmdc.cmd"
       "Windows mermaid CLI path.")
-    (defconst my/mermaid-cli-non-windows-path "/Users/tsonobe/.nodebrew/node/v22.3.0/bin/mmdc"
+    (defconst my/mermaid-cli-non-windows-path
+      (expand-file-name ".nodebrew/node/v22.3.0/bin/mmdc" my/user-home)
       "Non-Windows mermaid CLI path.")
 
     (defconst my/textlint-executable-windows-path "C:/scoop/apps/nodejs16/current/bin/textlint.cmd"
       "Windows textlint executable path.")
-    (defconst my/textlint-executable-non-windows-path "~/.nodebrew/node/v22.3.0/bin/textlint"
+    (defconst my/textlint-executable-non-windows-path
+      (expand-file-name ".nodebrew/node/v22.3.0/bin/textlint" my/user-home)
       "Non-Windows textlint executable path.")
     (defconst my/textlint-config-windows-path "C:/emacs-org/.textlintrc.json"
       "Windows textlint config path.")
-    (defconst my/textlint-config-non-windows-path "~/.emacs.d/.textlintrc.json"
+    (defconst my/textlint-config-non-windows-path
+      (expand-file-name ".textlintrc.json" user-emacs-directory)
       "Non-Windows textlint config path.")
 
     (defconst my/nodejs-home-windows-path "C:/scoop/apps/nodejs16/current"
@@ -124,27 +136,36 @@
       (list my/nodejs-home-windows-path
             my/nodejs-bin-windows-path)
       "Windows Node.js path candidates.")
-    (defconst my/nodejs-path-non-windows '("/Users/tsonobe/.nodebrew/current/bin/node")
+    (defconst my/nodejs-path-non-windows
+      (list (expand-file-name ".nodebrew/current/bin/node" my/user-home))
       "Non-Windows Node.js path candidates.")
     (defconst my/nodejs-path-prefix-windows
       (concat my/nodejs-home-windows-path ";" my/nodejs-bin-windows-path ";")
       "Windows PATH prefix for Node.js.")
-    (defconst my/nodejs-path-prefix-non-windows "/Users/tsonobe/.nodebrew/current/bin/node"
+    (defconst my/nodejs-path-prefix-non-windows
+      (expand-file-name ".nodebrew/current/bin/node" my/user-home)
       "Non-Windows PATH prefix for Node.js.")
 
     (defconst my/org-roam-directory-windows-path "C:/emacs-org/org-roam"
       "Windows org-roam directory path.")
-    (defconst my/org-roam-directory-non-windows-path "~/.emacs.d/org-roam"
+    (defconst my/org-roam-directory-non-windows-path
+      (expand-file-name "org-roam" user-emacs-directory)
       "Non-Windows org-roam directory path.")
     (defconst my/org-roam-db-windows-path "C:/emacs-org/org-roam/org-roam.db"
       "Windows org-roam DB path.")
-    (defconst my/org-roam-db-non-windows-path "~/.emacs.d/org-roam/org-roam.db"
+    (defconst my/org-roam-db-non-windows-path
+      (expand-file-name "org-roam/org-roam.db" user-emacs-directory)
       "Non-Windows org-roam DB path.")
 
     (defconst my/secrets-file-windows-path "C:/emacs-org/config/secrets.el"
       "Windows secrets file path.")
-    (defconst my/secrets-file-non-windows-path "~/.emacs.d/config/secrets.el"
+    (defconst my/secrets-file-non-windows-path
+      (expand-file-name "config/secrets.el" user-emacs-directory)
       "Non-Windows secrets file path.")
+
+    (defconst my/hugo-blog-root
+      (expand-file-name "devs/tsono-blog" my/user-home)
+      "Absolute path to the Hugo blog project root.")
 
     (defun my/inbox-file ()
       "Return the shared inbox.org path for the current OS."
@@ -1046,7 +1067,7 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
          ("C-c C-n h" . org-hugo-export-to-md))
   :config
   ;; Hugo プロジェクトのベースディレクトリ
-  (setq org-hugo-base-dir "~/devs/tsono-blog")
+  (setq org-hugo-base-dir my/hugo-blog-root)
 
   ;; 開いている org ファイルのディレクトリにエクスポートする（ページバンドル対応）
   (setq org-hugo-auto-set-export-dir t)
