@@ -440,6 +440,14 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
+(defconst my/org-capture-keys
+  '(("t" . "Todo")
+    ("w" . "Work Todo")
+    ("p" . "Private Todo")
+    ("s" . "Someday")
+    ("h" . "Hugo blog post"))
+  "Org capture template labels.")
+
 (defconst my/org-capture-section-targets
   '(("inbox" . "📥 INBOX")
     ("someday" . "🤔 Someday"))
@@ -450,19 +458,19 @@
   `(file+headline ,(my/inbox-file) ,(cdr (assoc key my/org-capture-section-targets))))
 
 (setq org-capture-templates
-	`(("t" "Todo" entry
+	`((,(car (assoc "t" my/org-capture-keys)) ,(cdr (assoc "t" my/org-capture-keys)) entry
 	   ,(my/org-capture-section-target "inbox")
 	   "** TODO %?")
-	  ("w" "Work Todo" entry
+	  (,(car (assoc "w" my/org-capture-keys)) ,(cdr (assoc "w" my/org-capture-keys)) entry
 	   ,(my/org-capture-section-target "inbox")
 	   "** TODO %?  :work:")
-	  ("p" "Private Todo" entry
+	  (,(car (assoc "p" my/org-capture-keys)) ,(cdr (assoc "p" my/org-capture-keys)) entry
 	   ,(my/org-capture-section-target "inbox")
 	   "** TODO %?  :private:")
-	  ("s" "Someday" entry
+	  (,(car (assoc "s" my/org-capture-keys)) ,(cdr (assoc "s" my/org-capture-keys)) entry
 	   ,(my/org-capture-section-target "someday")
 	   "** SAMEDAY %?")
-	  ("h" "Hugo blog post" plain
+	  (,(car (assoc "h" my/org-capture-keys)) ,(cdr (assoc "h" my/org-capture-keys)) plain
 	   (function my-org-hugo-new-post)
 	   ""
 	   :empty-lines 1)))
