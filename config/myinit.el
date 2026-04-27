@@ -228,10 +228,9 @@
                (cons shortcut template)))
 
 (require 'use-package)
-;; 以降でuse-package に設定したパッケージが未インストールの場合、自動でインストールする
-(setq use-package-always-ensure t)
-
-(setq package-enable-at-startup nil)
+;; use-package 経由の自動インストールと、起動時 package 初期化の抑止
+(setq use-package-always-ensure t
+      package-enable-at-startup nil)
 
 ;; org-tempo を読み込むことで、<s TAB などのテンプレ展開が有効になる
 (my/after-org-load
