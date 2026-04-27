@@ -210,6 +210,9 @@
     (defconst my/org-roam-node-filename-format
       "%<%Y%m%d%H%M%S>-${slug}.org"
       "Common filename format for non-Hugo org-roam captures.")
+    (defconst my/org-roam-dailies-date-format
+      "%<%Y-%m-%d>.org"
+      "Date format used for org-roam dailies capture target.")
 
     (defun my/inbox-file ()
       "Return the shared inbox.org path for the current OS."
@@ -457,10 +460,10 @@
       ;; org-roam-dailies のテンプレート設定（日報用）
       ;; -------------------------------------------------------------
       (setq org-roam-dailies-capture-templates
-	    '(("d" "dailies" entry
-	       "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
-	       :target (file+head "%<%Y-%m-%d>.org"
-				  "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
+		    `(("d" "dailies" entry
+		       "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
+		       :target (file+head ,my/org-roam-dailies-date-format
+					  "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
 
     (use-package org-roam-ui
       :after org-roam
