@@ -117,6 +117,14 @@
   (should (eq org-log-done 'time))
   (should (equal org-agenda-files (list my/inbox-file-non-windows-path))))
 
+(ert-deftest config-smoke/orgagenda保存先のOS別経路が維持される ()
+  (should (equal org-agenda-files (list my/inbox-file-non-windows-path)))
+  (let ((system-type 'windows-nt))
+    (should (equal (my/inbox-file)
+                   my/inbox-file-windows-path)))
+  (let ((system-type 'darwin))
+    (should (equal (my/inbox-file) my/inbox-file-non-windows-path))))
+
 (ert-deftest config-smoke/effort関連の設定と監視が維持される ()
   (should (equal org-global-properties
                  '(("Effort_ALL" . "0:05 0:10 0:15 0:30 0:45 1:00"))))
