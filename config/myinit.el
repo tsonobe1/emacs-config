@@ -200,6 +200,9 @@
   (concat my/org-roam-hugo-template-subdir
           "%<%Y%m%d%H%M%S>-${slug}.org")
   "org-roam capture target path for Hugo drafts.")
+(defconst my/org-roam-node-filename-format
+  "%<%Y%m%d%H%M%S>-${slug}.org"
+  "Common filename format for non-Hugo org-roam captures.")
 
 (defun my/inbox-file ()
   "Return the shared inbox.org path for the current OS."
@@ -381,40 +384,40 @@
             (if tag (format "#+filetags: :%s:\n" tag) "")))
 
   (setq org-roam-capture-templates
-	    `(("d" "default" plain "%?"
-	       :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline nil))
-	       :unnarrowed t)
+		    `(("d" "default" plain "%?"
+		       :target (file+head ,my/org-roam-node-filename-format
+					  ,(my/org-roam-capture-template-headline nil))
+		       :unnarrowed t)
+	
+		      ("n" "knowledge" plain "%?"
+		       :target (file+head ,(concat "knowledge/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "knowledge"))
+		       :unnarrowed t)
 
-	      ("n" "knowledge" plain "%?"
-	       :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "knowledge"))
-	       :unnarrowed t)
+		      ("w" "work" plain "%?"
+		       :target (file+head ,(concat "work/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "work"))
+		       :unnarrowed t)
 
-	      ("w" "work" plain "%?"
-	       :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "work"))
-	       :unnarrowed t)
+		      ("t" "tool" plain "%?"
+		       :target (file+head ,(concat "tool/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "tool"))
+		       :unnarrowed t)
 
-	      ("t" "tool" plain "%?"
-	       :target (file+head "tool/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "tool"))
-	       :unnarrowed t)
+		      ("r" "recipe" plain "%?"
+		       :target (file+head ,(concat "recipe/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "recipe"))
+		       :unnarrowed t)
 
-	      ("r" "recipe" plain "%?"
-	       :target (file+head "recipe/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "recipe"))
-	       :unnarrowed t)
+		      ("m" "money" plain "%?"
+		       :target (file+head ,(concat "money/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "money"))
+		       :unnarrowed t)
 
-	      ("m" "money" plain "%?"
-	       :target (file+head "money/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "money"))
-	       :unnarrowed t)
-
-	      ("c" "discuss" plain "%?"
-	       :target (file+head "discuss/%<%Y%m%d%H%M%S>-${slug}.org"
-				  ,(my/org-roam-capture-template-headline "discuss"))
-	       :unnarrowed t)
+		      ("c" "discuss" plain "%?"
+		       :target (file+head ,(concat "discuss/" my/org-roam-node-filename-format)
+					  ,(my/org-roam-capture-template-headline "discuss"))
+		       :unnarrowed t)
 
 	      ;; Hugo投稿用テンプレート（キー: h）
   ("h" "hugo" plain "%?"
