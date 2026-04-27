@@ -184,11 +184,37 @@
                    :target (file+head "knowledge/%<%Y%m%d%H%M%S>-${slug}.org"
                                       "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n#+filetags: :knowledge:\n")
                    :unnarrowed t)))
+  (should (equal (assoc "d" org-roam-capture-templates)
+                 `("d" "default" plain "%?"
+                   :target (file+head ,my/org-roam-node-filename-format
+                                    ,(my/org-roam-capture-template-headline nil))
+                   :unnarrowed t)))
   (should (equal (assoc "d" org-roam-dailies-capture-templates)
                  '("d" "dailies" entry
                    "* %<%Y/%m/%d(%a)>\n* 勤務時間\n09:30 ~ 18:30\n* 作業\n\n* 所感\n\n* 次日の予定\n%?"
                    :target (file+head "%<%Y-%m-%d>.org"
                                       "#+title: %<%Y-%m-%d>\n#+options: toc:nil\n#+options: author:nil\n#+options: num:nil\n")))))
+
+(ert-deftest config-smoke/orgroamのcapturetemplate一覧が仕様リスト全件と一致する ()
+  (let ((expected
+         (mapcar
+          (lambda (spec)
+            (let ((key (plist-get spec :key))
+                  (desc (plist-get spec :description))
+                  (type (or (plist-get spec :type) 'plain))
+                  (template (or (plist-get spec :template) "%?"))
+                  (target (plist-get spec :target))
+                  (headline (plist-get spec :headline))
+                  (extra-props (plist-get spec :extra-props)))
+              (append `(,key ,desc ,type ,template
+                            :target (file+head ,target ,headline)
+                            :unnarrowed t)
+                      extra-props)))
+          my/org-roam-capture-template-specs)))
+    (should (equal (length org-roam-capture-templates) (length expected)))
+    (should (equal (mapcar #'car org-roam-capture-templates)
+                   (mapcar #'car expected)))
+    (should (equal org-roam-capture-templates expected))))
 
 (ert-deftest config-smoke/orgroamのhugoテンプレートがブログ名由来で作られる ()
   (let* ((hugo-template (plist-get (nthcdr 4 (assoc "h" org-roam-capture-templates))

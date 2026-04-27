@@ -394,32 +394,55 @@
 
   (defconst my/org-roam-capture-template-specs
     (list
-     (list "d" "default" (my/org-roam-capture-target-path "")
-           (my/org-roam-capture-template-headline nil))
-     (list "n" "knowledge" (my/org-roam-capture-target-path "knowledge")
-           (my/org-roam-capture-template-headline "knowledge"))
-     (list "w" "work" (my/org-roam-capture-target-path "work")
-           (my/org-roam-capture-template-headline "work"))
-     (list "t" "tool" (my/org-roam-capture-target-path "tool")
-           (my/org-roam-capture-template-headline "tool"))
-     (list "r" "recipe" (my/org-roam-capture-target-path "recipe")
-           (my/org-roam-capture-template-headline "recipe"))
-     (list "m" "money" (my/org-roam-capture-target-path "money")
-           (my/org-roam-capture-template-headline "money"))
-     (list "c" "discuss" (my/org-roam-capture-target-path "discuss")
-           (my/org-roam-capture-template-headline "discuss"))
-     (list "h" "hugo" my/org-roam-hugo-template-path
-           "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n"))
+     (list :key "d"
+           :description "default"
+           :target (my/org-roam-capture-target-path "")
+           :headline (my/org-roam-capture-template-headline nil))
+     (list :key "n"
+           :description "knowledge"
+           :target (my/org-roam-capture-target-path "knowledge")
+           :headline (my/org-roam-capture-template-headline "knowledge"))
+     (list :key "w"
+           :description "work"
+           :target (my/org-roam-capture-target-path "work")
+           :headline (my/org-roam-capture-template-headline "work"))
+     (list :key "t"
+           :description "tool"
+           :target (my/org-roam-capture-target-path "tool")
+           :headline (my/org-roam-capture-template-headline "tool"))
+     (list :key "r"
+           :description "recipe"
+           :target (my/org-roam-capture-target-path "recipe")
+           :headline (my/org-roam-capture-template-headline "recipe"))
+     (list :key "m"
+           :description "money"
+           :target (my/org-roam-capture-target-path "money")
+           :headline (my/org-roam-capture-template-headline "money"))
+     (list :key "c"
+           :description "discuss"
+           :target (my/org-roam-capture-target-path "discuss")
+           :headline (my/org-roam-capture-template-headline "discuss"))
+     (list :key "h"
+           :description "hugo"
+           :target my/org-roam-hugo-template-path
+           :headline "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n"))
     "org-roam capture template specs.")
 
   (defun my/org-roam-capture-templates-list ()
     "Build org-roam capture templates for each configured CATEGORY."
     (mapcar
      (lambda (spec)
-       (pcase-let ((`(,key ,desc ,target ,headline) spec))
-         `(,key ,desc plain "%?"
-           :target (file+head ,target ,headline)
-           :unnarrowed t)))
+       (let ((key (plist-get spec :key))
+             (desc (plist-get spec :description))
+             (type (or (plist-get spec :type) 'plain))
+             (template (or (plist-get spec :template) "%?"))
+             (target (plist-get spec :target))
+             (headline (plist-get spec :headline))
+             (extra-props (plist-get spec :extra-props)))
+         (append `(,key ,desc ,type ,template
+                       :target (file+head ,target ,headline)
+                       :unnarrowed t)
+                 extra-props)))
      my/org-roam-capture-template-specs))
 
   (setq org-roam-capture-templates
