@@ -882,12 +882,16 @@ If PREFIX is empty, show a message and do nothing."
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (defconst my/fibonacci-points '(1 2 3 5 8 13 21 34 55 89)
-      "Fibonacci-like points available for Storypoint selection.")
+  "Fibonacci-like points available for Storypoint selection.")
 
-    (defun my/org-set-story-point ()
-      "Prompt for storypoint from Fibonacci values and set it as a property."
-      (interactive)
-      (let* ((choices (mapcar #'number-to-string my/fibonacci-points))
+(defconst my/org-storypoint-time-options
+  '("0:01" "0:03" "0:05" "0:10" "0:15" "0:30" "0:45" "1:00")
+  "Candidate base effort times for Storypoint expansion.")
+
+(defun my/org-set-story-point ()
+  "Prompt for storypoint from Fibonacci values and set it as a property."
+  (interactive)
+  (let* ((choices (mapcar #'number-to-string my/fibonacci-points))
 	     (choice (completing-read "Storypoint: " choices nil t)))
 	(org-set-property "Storypoint" choice)))
 
@@ -930,10 +934,10 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
 
     (if (null entries)
         (message "No child tasks with Storypoint found.")
-      (let* ((time-options '("0:01" "0:03" "0:05" "0:10" "0:15" "0:30" "0:45" "1:00"))
-             (base-choice (completing-read
-                           (format "Time for Storypoint %d (min): " min-point)
-                           time-options nil t))
+	  (let* ((time-options my/org-storypoint-time-options)
+	             (base-choice (completing-read
+	                           (format "Time for Storypoint %d (min): " min-point)
+	                           time-options nil t))
              (base-minutes (let* ((parts (split-string base-choice ":"))
                                   (h (string-to-number (car parts)))
                                   (m (string-to-number (cadr parts))))
