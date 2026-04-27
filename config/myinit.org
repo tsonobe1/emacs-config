@@ -252,14 +252,10 @@
     ;; Python 実行コマンドのパスを OS によって切り替える
     ;; Windows の場合と macOS/Linux の場合で別の仮想環境を指定
     (setq org-babel-python-command
-	  (my/os-path my/python-exec-windows-path
-		      my/python-exec-non-windows-path))
-
-    ;; Org Babel 実行時の確認プロンプトを無効にする
-    (setq org-confirm-babel-evaluate nil)
-
-    ;; 長い行を自動折り返し（truncated: nil にすると折り返し）
-    (setq org-startup-truncated nil)
+          (my/os-path my/python-exec-windows-path
+                      my/python-exec-non-windows-path)
+          org-confirm-babel-evaluate nil
+          org-startup-truncated nil)
 
     ;; org-babel によって実行可能な言語を登録
     (org-babel-do-load-languages
