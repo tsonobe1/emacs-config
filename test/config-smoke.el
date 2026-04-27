@@ -135,6 +135,18 @@
   (should (equal (nth 3 (assoc "s" org-capture-templates))
                  `(file+headline ,my/inbox-file-non-windows-path "🤔 Someday"))))
 
+(ert-deftest config-smoke/orgcaptureセクションヘルパーがOS別保存先を維持する ()
+  (let ((system-type 'windows-nt))
+    (should (equal (my/org-capture-section-target "inbox")
+                   `(file+headline ,my/inbox-file-windows-path "📥 INBOX")))
+    (should (equal (my/org-capture-section-target "someday")
+                   `(file+headline ,my/inbox-file-windows-path "🤔 Someday"))))
+  (let ((system-type 'darwin))
+    (should (equal (my/org-capture-section-target "inbox")
+                   `(file+headline ,my/inbox-file-non-windows-path "📥 INBOX")))
+    (should (equal (my/org-capture-section-target "someday")
+                   `(file+headline ,my/inbox-file-non-windows-path "🤔 Someday")))))
+
 (ert-deftest config-smoke/orgの進捗集計結果が維持される ()
   (with-temp-buffer
     (org-mode)
