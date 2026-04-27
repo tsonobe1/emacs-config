@@ -31,7 +31,8 @@ tramp
 # org-roamは別リポジトリとして管理
 org-roam
 inbox.org
-flycheck_inbox.org
+flycheck_inbox*.org
+flycheck_inbox*.sync-conflict-*.org
 org.org
 images/
 .#*.org
