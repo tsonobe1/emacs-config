@@ -386,47 +386,41 @@
     (concat "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n"
             (if tag (format "#+filetags: :%s:\n" tag) "")))
 
+  (defconst my/org-roam-capture-categories
+    '(("d" "default" nil)
+      ("n" "knowledge" "knowledge")
+      ("w" "work" "work")
+      ("t" "tool" "tool")
+      ("r" "recipe" "recipe")
+      ("m" "money" "money")
+      ("c" "discuss" "discuss"))
+    "org-capture keys and org-roam tags.")
+
+  (defun my/org-roam-capture-target-path (category)
+    "Return capture target path for CATEGORY."
+    (if (string-empty-p category)
+        my/org-roam-node-filename-format
+      (concat category "/" my/org-roam-node-filename-format)))
+
+  (defun my/org-roam-capture-templates-list ()
+    "Build org-roam capture templates for each configured CATEGORY."
+    (mapcar
+     (lambda (spec)
+       (let* ((key (nth 0 spec))
+              (desc (nth 1 spec))
+              (category (nth 2 spec)))
+         `(,key ,desc plain "%?"
+           :target (file+head ,(my/org-roam-capture-target-path category)
+                             ,(my/org-roam-capture-template-headline category))
+           :unnarrowed t)))
+     my/org-roam-capture-categories))
+
   (setq org-roam-capture-templates
-		    `(("d" "default" plain "%?"
-		       :target (file+head ,my/org-roam-node-filename-format
-					  ,(my/org-roam-capture-template-headline nil))
-		       :unnarrowed t)
-	
-		      ("n" "knowledge" plain "%?"
-		       :target (file+head ,(concat "knowledge/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "knowledge"))
-		       :unnarrowed t)
-
-		      ("w" "work" plain "%?"
-		       :target (file+head ,(concat "work/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "work"))
-		       :unnarrowed t)
-
-		      ("t" "tool" plain "%?"
-		       :target (file+head ,(concat "tool/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "tool"))
-		       :unnarrowed t)
-
-		      ("r" "recipe" plain "%?"
-		       :target (file+head ,(concat "recipe/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "recipe"))
-		       :unnarrowed t)
-
-		      ("m" "money" plain "%?"
-		       :target (file+head ,(concat "money/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "money"))
-		       :unnarrowed t)
-
-		      ("c" "discuss" plain "%?"
-		       :target (file+head ,(concat "discuss/" my/org-roam-node-filename-format)
-					  ,(my/org-roam-capture-template-headline "discuss"))
-		       :unnarrowed t)
-
-	      ;; Hugo投稿用テンプレート（キー: h）
-  ("h" "hugo" plain "%?"
-   :target (file+head ,my/org-roam-hugo-template-path
-				  "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
-   :unnarrowed t)))
+          (append (my/org-roam-capture-templates-list)
+                  `(("h" "hugo" plain "%?"
+                     :target (file+head ,my/org-roam-hugo-template-path
+                                      "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
+                     :unnarrowed t))))
 
   ;; -------------------------------------------------------------
   ;; org-roam-dailies のテンプレート設定（日報用）
