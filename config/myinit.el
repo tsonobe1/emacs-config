@@ -485,17 +485,12 @@
 (add-hook 'org-agenda-mode-hook #'my/org-agenda-enable-current-line-highlight)
 
 ;; ハイライトスタイルを下線に
-(setq hl-line-face 'underline)
-
-
-;; ---------------------------------------------------------
-;; Org Agenda のログ・クロック機能
-;; ---------------------------------------------------------
-;; agenda のログ表示とクロック集計に関する既定値
-(setq org-agenda-log-mode-items '(closed clock)
+;; Org Agenda のログ・クロック・表示設定
+(setq hl-line-face 'underline
+      org-agenda-log-mode-items '(closed clock)
       org-agenda-start-with-log-mode t
-      org-agenda-clockreport-mode t)
-
+      org-agenda-clockreport-mode t
+      org-clock-out-when-done t)
 
 ;; ---------------------------------------------------------
 ;; Org Agenda のキーバインド拡張（ロード後に定義）
@@ -514,9 +509,6 @@
 ;; org-agenda モードが読み込まれた後にカスタムキーバインドを定義
 (my/after-org-agenda-load
   (my/org-agenda-bind-clock-keys))
-
-;; タスクが完了した時に自動的にclock outする
-(setq org-clock-out-when-done t)
 
 ;; ------------------------------------------------------------
 ;; Org の ASCII / Markdown エクスポートに関する設定
