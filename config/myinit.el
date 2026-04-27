@@ -498,14 +498,10 @@
 ;; ---------------------------------------------------------
 ;; Org Agenda のログ・クロック機能
 ;; ---------------------------------------------------------
-;; 「ログモード」に表示する内容を指定（完了時刻とクロック時間）
-(setq org-agenda-log-mode-items '(closed clock))
-
-;; agenda を開いたときにログ表示モードを自動で有効化
-(setq org-agenda-start-with-log-mode t)
-
-;; クロックレポート（作業時間集計）を agenda 内で表示可能にする
-(setq org-agenda-clockreport-mode t) ;; org-agendaで時計レポートを有効化
+;; agenda のログ表示とクロック集計に関する既定値
+(setq org-agenda-log-mode-items '(closed clock)
+      org-agenda-start-with-log-mode t
+      org-agenda-clockreport-mode t)
 
 
 ;; ---------------------------------------------------------
