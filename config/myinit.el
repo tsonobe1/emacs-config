@@ -304,7 +304,9 @@
                   my/textlint-executable-non-windows-path) ; textlintのパスを指定
       flycheck-textlint-config
       (my/os-path my/textlint-config-windows-path
-                  my/textlint-config-non-windows-path)) ; 設定ファイルのパス
+                  my/textlint-config-non-windows-path) ; 設定ファイルのパス
+      flycheck-checkers '(textlint)
+      flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
 
 ;; textlint を Flycheck のチェッカーとして定義する
 (flycheck-define-checker textlint
@@ -324,12 +326,6 @@
 
 ;; textlint を有効化するモードで flycheck-mode を自動オン
 (add-hook 'org-mode-hook #'flycheck-mode)
-
-;; デフォルトチェッカーを textlint のみに設定（他の checker を無効化）
-(setq flycheck-checkers '(textlint))
-
-;; エラーがあればミニバッファに表示（エラーリストバッファが開いていない時）
-(setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
 
 (let ((node-exec-paths
 	 (my/os-path my/nodejs-path-windows
