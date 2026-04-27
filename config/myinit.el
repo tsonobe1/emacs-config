@@ -311,8 +311,8 @@
 ;; textlint を Flycheck のチェッカーとして定義する
 (flycheck-define-checker textlint
   "A linter using textlint."
-  :command ("textlint" "--format" "unix" 
-	      source-inplace) ; ファイルに対して直接チェックを実行
+  :command ("textlint" "--format" "unix"
+		      source-inplace) ; ファイルに対して直接チェックを実行
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ": "
 	      (id (one-or-more (not (any " ")))) ; エラーID
@@ -551,7 +551,7 @@
 
   ;; キーバインドを設定 (org-modeだけで有効)
   (my/after-org-load
-    (define-key org-mode-map (kbd "C-c C-x n") #'my/org-add-node-link-property ))
+    (define-key org-mode-map (kbd "C-c C-x n") #'my/org-add-node-link-property))
 
 
 
