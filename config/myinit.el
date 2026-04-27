@@ -440,14 +440,6 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
-(defconst my/org-capture-keys
-  '(("t" . "Todo")
-    ("w" . "Work Todo")
-    ("p" . "Private Todo")
-    ("s" . "Someday")
-    ("h" . "Hugo blog post"))
-  "Org capture template labels.")
-
 (defconst my/org-capture-section-targets
   '(("inbox" . "📥 INBOX")
     ("someday" . "🤔 Someday"))
@@ -457,23 +449,28 @@
   "Return org-capture section target list for capture KEY."
   `(file+headline ,(my/inbox-file) ,(cdr (assoc key my/org-capture-section-targets))))
 
+(defconst my/org-capture-template-specs
+  (list
+   (list "t" "Todo" 'entry
+         (my/org-capture-section-target "inbox")
+         "** TODO %?")
+   (list "w" "Work Todo" 'entry
+         (my/org-capture-section-target "inbox")
+         "** TODO %?  :work:")
+   (list "p" "Private Todo" 'entry
+         (my/org-capture-section-target "inbox")
+         "** TODO %?  :private:")
+   (list "s" "Someday" 'entry
+         (my/org-capture-section-target "someday")
+         "** SAMEDAY %?")
+   (list "h" "Hugo blog post" 'plain
+         (function my-org-hugo-new-post)
+         ""
+         :empty-lines 1))
+  "Reusable specs for org-capture-templates.")
+
 (setq org-capture-templates
-	`((,(car (assoc "t" my/org-capture-keys)) ,(cdr (assoc "t" my/org-capture-keys)) entry
-	   ,(my/org-capture-section-target "inbox")
-	   "** TODO %?")
-	  (,(car (assoc "w" my/org-capture-keys)) ,(cdr (assoc "w" my/org-capture-keys)) entry
-	   ,(my/org-capture-section-target "inbox")
-	   "** TODO %?  :work:")
-	  (,(car (assoc "p" my/org-capture-keys)) ,(cdr (assoc "p" my/org-capture-keys)) entry
-	   ,(my/org-capture-section-target "inbox")
-	   "** TODO %?  :private:")
-	  (,(car (assoc "s" my/org-capture-keys)) ,(cdr (assoc "s" my/org-capture-keys)) entry
-	   ,(my/org-capture-section-target "someday")
-	   "** SAMEDAY %?")
-	  (,(car (assoc "h" my/org-capture-keys)) ,(cdr (assoc "h" my/org-capture-keys)) plain
-	   (function my-org-hugo-new-post)
-	   ""
-	   :empty-lines 1)))
+      (mapcar #'identity my/org-capture-template-specs))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の基本設定
