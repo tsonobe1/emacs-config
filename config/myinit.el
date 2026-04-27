@@ -381,46 +381,49 @@
   ;; 各カテゴリごとに保存場所・ファイル名・タグを指定
   ;; -------------------------------------------------------------
 
-  (defun my/org-roam-capture-template-headline (tag)
-    "Generate org-roam capture headline with TITLE, DATE and optional TAG."
-    (concat "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n"
-            (if tag (format "#+filetags: :%s:\n" tag) "")))
-
-  (defconst my/org-roam-capture-categories
-    '(("d" "default" nil)
-      ("n" "knowledge" "knowledge")
-      ("w" "work" "work")
-      ("t" "tool" "tool")
-      ("r" "recipe" "recipe")
-      ("m" "money" "money")
-      ("c" "discuss" "discuss"))
-    "org-capture keys and org-roam tags.")
-
   (defun my/org-roam-capture-target-path (category)
     "Return capture target path for CATEGORY."
     (if (string-empty-p category)
         my/org-roam-node-filename-format
       (concat category "/" my/org-roam-node-filename-format)))
 
+  (defun my/org-roam-capture-template-headline (tag)
+    "Generate org-roam capture headline with TITLE, DATE and optional TAG."
+    (concat "#+title: ${title}\n#+date: %<%Y-%m-%d %H:%M:%S>\n"
+            (if tag (format "#+filetags: :%s:\n" tag) "")))
+
+  (defconst my/org-roam-capture-template-specs
+    (list
+     (list "d" "default" (my/org-roam-capture-target-path "")
+           (my/org-roam-capture-template-headline nil))
+     (list "n" "knowledge" (my/org-roam-capture-target-path "knowledge")
+           (my/org-roam-capture-template-headline "knowledge"))
+     (list "w" "work" (my/org-roam-capture-target-path "work")
+           (my/org-roam-capture-template-headline "work"))
+     (list "t" "tool" (my/org-roam-capture-target-path "tool")
+           (my/org-roam-capture-template-headline "tool"))
+     (list "r" "recipe" (my/org-roam-capture-target-path "recipe")
+           (my/org-roam-capture-template-headline "recipe"))
+     (list "m" "money" (my/org-roam-capture-target-path "money")
+           (my/org-roam-capture-template-headline "money"))
+     (list "c" "discuss" (my/org-roam-capture-target-path "discuss")
+           (my/org-roam-capture-template-headline "discuss"))
+     (list "h" "hugo" my/org-roam-hugo-template-path
+           "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n"))
+    "org-roam capture template specs.")
+
   (defun my/org-roam-capture-templates-list ()
     "Build org-roam capture templates for each configured CATEGORY."
     (mapcar
      (lambda (spec)
-       (let* ((key (nth 0 spec))
-              (desc (nth 1 spec))
-              (category (nth 2 spec)))
+       (pcase-let ((`(,key ,desc ,target ,headline) spec))
          `(,key ,desc plain "%?"
-           :target (file+head ,(my/org-roam-capture-target-path category)
-                             ,(my/org-roam-capture-template-headline category))
+           :target (file+head ,target ,headline)
            :unnarrowed t)))
-     my/org-roam-capture-categories))
+     my/org-roam-capture-template-specs))
 
   (setq org-roam-capture-templates
-          (append (my/org-roam-capture-templates-list)
-                  `(("h" "hugo" plain "%?"
-                     :target (file+head ,my/org-roam-hugo-template-path
-                                      "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+lastmod: %<%Y-%m-%d>\n#+description:\n#+tags:\n#+categories:\n#+draft: false\n#+hugo: true\n")
-                     :unnarrowed t))))
+          (my/org-roam-capture-templates-list))
 
   ;; -------------------------------------------------------------
   ;; org-roam-dailies のテンプレート設定（日報用）
