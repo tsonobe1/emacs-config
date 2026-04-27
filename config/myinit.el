@@ -440,22 +440,32 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Org Captureテンプレートの設定
-(let* ((inbox-file (my/inbox-file))
-       (inbox-target `(file+headline ,inbox-file "📥 INBOX"))
-       (someday-target `(file+headline ,inbox-file "🤔 Someday")))
-  (setq org-capture-templates
-	  `(("t" "Todo" entry ,inbox-target
-	     "** TODO %?")
-	    ("w" "Work Todo" entry ,inbox-target
-	     "** TODO %?  :work:")
-	    ("p" "Private Todo" entry ,inbox-target
-	     "** TODO %?  :private:")
-	    ("s" "Someday" entry ,someday-target
-	     "** SAMEDAY %?")
-	    ("h" "Hugo blog post" plain
-	     (function my-org-hugo-new-post)
-	     ""
-	     :empty-lines 1))))
+(defconst my/org-capture-section-targets
+  '(("inbox" . "📥 INBOX")
+    ("someday" . "🤔 Someday"))
+  "Target section headlines for org-capture templates.")
+
+(defun my/org-capture-section-target (key)
+  "Return org-capture section target list for capture KEY."
+  `(file+headline ,(my/inbox-file) ,(cdr (assoc key my/org-capture-section-targets))))
+
+(setq org-capture-templates
+	`(("t" "Todo" entry
+	   ,(my/org-capture-section-target "inbox")
+	   "** TODO %?")
+	  ("w" "Work Todo" entry
+	   ,(my/org-capture-section-target "inbox")
+	   "** TODO %?  :work:")
+	  ("p" "Private Todo" entry
+	   ,(my/org-capture-section-target "inbox")
+	   "** TODO %?  :private:")
+	  ("s" "Someday" entry
+	   ,(my/org-capture-section-target "someday")
+	   "** SAMEDAY %?")
+	  ("h" "Hugo blog post" plain
+	   (function my-org-hugo-new-post)
+	   ""
+	   :empty-lines 1)))
 
 ;; ---------------------------------------------------------
 ;; Org Agenda の基本設定
