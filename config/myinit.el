@@ -344,10 +344,8 @@
   (setenv "PATH" (concat node-path-prefix (getenv "PATH"))))
 
 (setq org-todo-keywords
-	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
-
-;; Doneの時刻を記録する
-(setq org-log-done 'time)
+	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)"))
+      org-log-done 'time)
 
 ;; -------------------------------------------------------------
 ;; org-roam の導入と初期設定

@@ -368,10 +368,8 @@
 ** todo
 #+BEGIN_SRC emacs-lisp
   (setq org-todo-keywords
-	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)")))
-
-  ;; Doneの時刻を記録する
-  (setq org-log-done 'time)
+	'((sequence "TODO(t)" "WAIT(w)" "SAMEDAY(s)" "|" "DONE(d)" "CANCEL(c)"))
+        org-log-done 'time)
 #+END_SRC
 
 ** org-roam 
