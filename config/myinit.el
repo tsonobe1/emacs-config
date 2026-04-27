@@ -1099,9 +1099,9 @@ Also set total Effort and Storypoint on the top-level heading (excluding itself 
          (org-mode . org-download-enable))
   :config
   ;; 画像は現在開いている org ファイルと同じディレクトリに保存
-  (setq org-download-method 'directory)
-  (setq org-download-image-dir "./") ; 現在のorgファイルと同じ場所
-  (setq org-download-screenshot-method "screencapture -i %s")) ;; macOSの場合
+  (setq org-download-method 'directory
+        org-download-image-dir "./"
+        org-download-screenshot-method "screencapture -i %s")) ;; macOSの場合
 
 ;; Org の画像表示はデフォルトで展開せず、表示幅だけ統一する
 (setq org-startup-with-inline-images nil
