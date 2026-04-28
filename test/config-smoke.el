@@ -455,4 +455,9 @@
                    '(("melpa" . "https://melpa.org/packages/")
                      ("gnu" . "https://elpa.gnu.org/packages/"))))))
 
+(ert-deftest config-smoke/os-pathはWindows以外で非Windows側を使う ()
+  (let ((system-type 'darwin))
+    (should (equal (my/os-path "W:/dir/x.org" "/tmp/x.org")
+                   "/tmp/x.org"))))
+
 ;;; config-smoke.el ends here
