@@ -1,15 +1,15 @@
-* My Emacs config
+* My Emacs 設定
 
-This repository is maintained from [[file:config/myinit.org][config/myinit.org]] and generated to
-[[file:config/myinit.el][config/myinit.el]] by org-babel tangle.
+このリポジトリは [[file:config/myinit.org][config/myinit.org]] を本体として
+[[file:config/myinit.el][config/myinit.el]] を org-babel tangle で生成します。
 
-Regenerate the tangled config artifact with:
+設定の再生成コマンド:
 
 #+begin_src sh
 emacs --batch -Q -l scripts/tangle-myinit.el
 #+end_src
 
-Run smoke tests:
+smoke テスト実行コマンド:
 
 #+begin_src sh
 emacs --batch -Q -l test/config-smoke.el -f ert-run-tests-batch-and-exit
