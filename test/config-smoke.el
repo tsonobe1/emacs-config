@@ -13,36 +13,39 @@
   "Return non-nil when HOOK contains FUNCTION."
   (member function (symbol-value hook)))
 
+(defconst config-test--windows-path-symbol-pairs
+  '((my/python-exec-windows-path . my/python-exec-non-windows-path)
+    (my/nodejs-path-prefix-windows . my/nodejs-path-prefix-non-windows)
+    (my/mermaid-cli-windows-path . my/mermaid-cli-non-windows-path)
+    (my/textlint-executable-windows-path . my/textlint-executable-non-windows-path)
+    (my/textlint-config-windows-path . my/textlint-config-non-windows-path)
+    (my/org-roam-directory-windows-path . my/org-roam-directory-non-windows-path)
+    (my/org-roam-db-windows-path . my/org-roam-db-non-windows-path)
+    (my/secrets-file-windows-path . my/secrets-file-non-windows-path)
+    (my/inbox-file-windows-slash-path . my/inbox-file-non-windows-path)
+    (my/inbox-file-windows-path . my/inbox-file-non-windows-path))
+  "Windows/non-Windows path symbol pairs used by the shared config.")
+
 (defconst config-test--windows-path-pairs
-  `((,my/python-exec-windows-path ,my/python-exec-non-windows-path)
-    (,my/nodejs-path-prefix-windows ,my/nodejs-path-prefix-non-windows)
-    (,my/mermaid-cli-windows-path ,my/mermaid-cli-non-windows-path)
-    (,my/textlint-executable-windows-path ,my/textlint-executable-non-windows-path)
-    (,my/textlint-config-windows-path ,my/textlint-config-non-windows-path)
-    (,my/org-roam-directory-windows-path ,my/org-roam-directory-non-windows-path)
-    (,my/org-roam-db-windows-path ,my/org-roam-db-non-windows-path)
-    (,my/secrets-file-windows-path ,my/secrets-file-non-windows-path)
-    (,my/inbox-file-windows-slash-path ,my/inbox-file-non-windows-path)
-    (,my/inbox-file-windows-path ,my/inbox-file-non-windows-path))
+  (mapcar (lambda (pair)
+            (list (symbol-value (car pair))
+                  (symbol-value (cdr pair))))
+          config-test--windows-path-symbol-pairs)
   "Windows/non-Windows path pairs used by the shared config.")
 
+(defconst config-test--windows-source-symbols
+  (append '(my/windows-sync-root
+            my/windows-nodejs-root
+            my/python-exec-windows-path
+            my/nodejs-home-windows-path
+            my/nodejs-bin-windows-path
+            my/nodejs-path-windows
+            my/org-roam-hugo-template-path)
+          (mapcar #'car config-test--windows-path-symbol-pairs))
+  "Windows-related config symbols that should remain defined in `config/myinit.org`.")
+
 (defconst config-test--windows-source-paths
-  '("my/windows-sync-root"
-    "my/windows-nodejs-root"
-    "my/python-exec-windows-path"
-    "my/inbox-file-windows-slash-path"
-    "my/inbox-file-windows-path"
-    "my/mermaid-cli-windows-path"
-    "my/textlint-executable-windows-path"
-    "my/textlint-config-windows-path"
-    "my/nodejs-home-windows-path"
-    "my/nodejs-bin-windows-path"
-    "my/nodejs-path-windows"
-    "my/nodejs-path-prefix-windows"
-    "my/org-roam-directory-windows-path"
-    "my/org-roam-db-windows-path"
-    "my/secrets-file-windows-path"
-    "my/org-roam-hugo-template-path")
+  (delete-dups (mapcar #'symbol-name config-test--windows-source-symbols))
   "Windows-related config symbols that should remain defined in `config/myinit.org`.")
 
 (ert-deftest config-smoke/Emacsを起動するとorgソースを読む ()
